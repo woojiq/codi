@@ -1,5 +1,3 @@
-use std::fmt;
-
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Rgb {
     pub r: u8,
@@ -8,15 +6,13 @@ pub struct Rgb {
 }
 
 impl Rgb {
-    pub fn new(red: u8, green: u8, blue: u8) -> Self {
+    pub const fn new(red: u8, green: u8, blue: u8) -> Self {
         Self {
             r: red,
             g: green,
             b: blue,
         }
     }
-
-    /* These getters are mostly intended for better code readability for external use. */
 
     pub fn red(&self) -> u8 {
         self.r
@@ -37,6 +33,6 @@ impl std::fmt::Display for Rgb {
     }
 }
 
-pub fn rgb(red: u8, green: u8, blue: u8) -> Rgb {
+pub const fn rgb(red: u8, green: u8, blue: u8) -> Rgb {
     Rgb::new(red, green, blue)
 }

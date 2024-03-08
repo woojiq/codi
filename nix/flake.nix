@@ -17,10 +17,14 @@
     devShells = forAllSystems (pkgs: {
       default = pkgs.mkShell {
         packages = with pkgs; [
-          # Rust
           rust-bin.stable.latest.default
           rust-analyzer
           gdb
+        ];
+      };
+      nightly = pkgs.mkShell {
+        packages = with pkgs; [
+          rust-bin.nightly."2024-02-01".default
         ];
       };
     });
