@@ -14,15 +14,15 @@ impl Rgb {
         }
     }
 
-    pub fn red(&self) -> u8 {
+    pub const fn red(&self) -> u8 {
         self.r
     }
 
-    pub fn green(&self) -> u8 {
+    pub const fn green(&self) -> u8 {
         self.g
     }
 
-    pub fn blue(&self) -> u8 {
+    pub const fn blue(&self) -> u8 {
         self.b
     }
 }

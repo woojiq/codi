@@ -73,7 +73,7 @@ fn array_with_all_colors(buff: &mut String, colors: &[HtmlColorRaw]) {
         colors.len()
     );
     for HtmlColorRaw { name, ctor } in colors {
-        *buff += &format!("\t(\"{}\", {}),\n", name, ctor);
+        *buff += &format!("\t(\"{name}\", {ctor}),\n");
     }
     *buff += "];\n";
 }

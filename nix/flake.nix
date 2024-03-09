@@ -14,12 +14,16 @@
         "aarch64-linux"
       ] (system: function (nixpkgs.legacyPackages.${system}.extend (import rust-overlay)));
   in {
-    devShells = forAllSystems (pkgs: {
+    devShells = forAllSystems (pkgs: let
+      rust_ = pkgs.rust-bin.fromRustupToolchainFile ../rust-toolchain.toml;
+      check = import ./check.nix {inherit pkgs rust_;};
+    in {
       default = pkgs.mkShell {
         packages = with pkgs; [
-          rust-bin.stable.latest.default
+          rust_
           rust-analyzer
           gdb
+          check.check-clippy
         ];
       };
       nightly = pkgs.mkShell {

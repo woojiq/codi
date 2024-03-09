@@ -4,18 +4,21 @@ use crate::color_space::Rgb;
 
 // Formula: https://www.compuphase.com/cmetric.htm
 //
+#[allow(clippy::missing_panics_doc)]
 pub fn euclidean_improved(c1: Rgb, c2: Rgb) -> NotNan<f32> {
-    let red_mean = (c1.r as f32 + c2.r as f32) / 2.0;
+    let red_mean = (f32::from(c1.r) + f32::from(c2.r)) / 2.0;
     let (d_r, d_g, d_b) = (
-        (c1.r as f32 - c2.r as f32),
-        (c1.g as f32 - c2.g as f32),
-        (c1.b as f32 - c2.b as f32)
+        (f32::from(c1.r) - f32::from(c2.r)),
+        (f32::from(c1.g) - f32::from(c2.g)),
+        (f32::from(c1.b) - f32::from(c2.b))
     );
     let dist: f32 =
-        (2.0 + red_mean / 256.0) * d_r.powi(2) +
-        4.0 * d_g.powi(2) +
-        (2.0 + (255.0 - red_mean) / 256.0) * d_b.powi(2);
-    NotNan::new(dist).unwrap()
+        (2.0 + (255.0 - red_mean) / 256.0).mul_add(
+            d_b.powi(2),
+            (2.0 + red_mean / 256.0).mul_add(d_r.powi(2), 4.0 * d_g.powi(2))
+        );
+    NotNan::new(dist)
+        .expect("SAFETY: We divide by non-zero const, the input data are integers.")
 }
 
 pub fn find_closest(target: Rgb, candidates: &[Rgb]) -> Option<Rgb> {

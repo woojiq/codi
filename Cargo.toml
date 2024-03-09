@@ -2,7 +2,9 @@
 name = "codi"
 version = "0.1.0"
 edition = "2021"
+description = "Color perception difference utilities."
 build = "build/main.rs"
+categories = ["graphics", "algorithms"]
 
 [dependencies]
 ordered-float = "4.2.0"
