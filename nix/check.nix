@@ -1,24 +1,24 @@
 {
   pkgs,
-  rust_,
+  rust,
 }: {
-  check-clippy = pkgs.writeShellApplication {
-    name = "check-clippy";
+  run-clippy = pkgs.writeShellApplication {
+    name = "run-clippy";
     runtimeInputs = [
-      rust_
+      rust
     ];
     text = ''
       cargo clippy -- \
-        -W clippy::all \
-        -W clippy::correctness \
-        -W clippy::suspicious \
-        -W clippy::style \
-        -W clippy::complexity \
-        -W clippy::perf \
-        -W clippy::pedantic \
-        -W clippy::nursery \
-        -W clippy::cargo \
-        -A clippy::must_use_candidate
+        -D clippy::all \
+        -D clippy::correctness \
+        -D clippy::suspicious \
+        -D clippy::style \
+        -D clippy::complexity \
+        -D clippy::perf \
+        -D clippy::pedantic \
+        -D clippy::nursery \
+        -D clippy::cargo \
+        -A clippy::must_use_candidate \
     '';
   };
 }
