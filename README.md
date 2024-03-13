@@ -7,3 +7,4 @@ Perceptually uniform color spaces: https://programmingdesignsystems.com/color/pe
 ## TODO
 * no-std support
 * https://rust-lang.github.io/api-guidelines/about.html
+* Open curly bracket on new line

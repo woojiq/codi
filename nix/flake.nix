@@ -39,7 +39,10 @@
 
       checks.default = self.packages.${system}.default.overrideAttrs (
         finalAttrs: previousAttrs: {
-          nativeCheckInputs = [rust check.run-clippy];
+          nativeCheckInputs = [
+            rust
+            check.clippy-deny
+          ];
           doCheck = true;
           checkPhase = ''
             cargo test
@@ -54,7 +57,7 @@
             [
               rust-analyzer
               gdb
-              check.run-clippy
+              check.clippy-warn
             ]
             ++ nativeBuildInputs;
         };

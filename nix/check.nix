@@ -1,24 +1,33 @@
 {
   pkgs,
   rust,
-}: {
-  run-clippy = pkgs.writeShellApplication {
-    name = "run-clippy";
-    runtimeInputs = [
-      rust
-    ];
-    text = ''
-      cargo clippy -- \
-        -D clippy::all \
-        -D clippy::correctness \
-        -D clippy::suspicious \
-        -D clippy::style \
-        -D clippy::complexity \
-        -D clippy::perf \
-        -D clippy::pedantic \
-        -D clippy::nursery \
-        -D clippy::cargo \
-        -A clippy::must_use_candidate \
-    '';
-  };
+}: let
+  clippyCommonText = ''
+    cargo clippy -- \
+      -W clippy::all \
+      -W clippy::correctness \
+      -W clippy::suspicious \
+      -W clippy::style \
+      -W clippy::complexity \
+      -W clippy::perf \
+      -W clippy::pedantic \
+      -W clippy::nursery \
+      -W clippy::cargo \
+      -A clippy::must_use_candidate \
+  '';
+  clippyWithText = text:
+    pkgs.writeShellApplication {
+      name = "run-clippy";
+      runtimeInputs = [
+        rust
+      ];
+      inherit text;
+    };
+in {
+  # The reason we have different packages for "warn" and "deny" is that if you set
+  # the level to "deny" you won't see all the errors in one run.
+  clippy-warn = clippyWithText clippyCommonText;
+  clippy-deny = clippyWithText ''
+    ${clippyCommonText} -D warnings
+  '';
 }

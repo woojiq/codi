@@ -4,7 +4,6 @@ struct HtmlColorRaw<'a> {
 }
 
 /**
-
     Generates file with the named html colors.
 
     File line format: "aliceblue rgb(240, 248, 255)". Comments and empty lines are allowed.
