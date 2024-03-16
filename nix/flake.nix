@@ -57,7 +57,12 @@
             [
               rust-analyzer
               gdb
+              cargo-mutants
+              cargo-tarpaulin
+
               check.clippy-warn
+
+              hyprpicker
             ]
             ++ nativeBuildInputs;
         };

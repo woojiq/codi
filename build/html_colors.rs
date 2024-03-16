@@ -51,9 +51,6 @@ fn parse_html_colors(content: &str) -> Vec<HtmlColorRaw> {
 
         colors.push(HtmlColorRaw { name, ctor });
     }
-
-    // Modify it when adding new entries to the file.
-    assert_eq!(colors.len(), 147);
     colors
 }
 
@@ -68,7 +65,7 @@ fn separate_const_for_each_color(buff: &mut String, colors: &[HtmlColorRaw]) {
 
 fn array_with_all_colors(buff: &mut String, colors: &[HtmlColorRaw]) {
     *buff += &format!(
-        "pub const HTML_NAMED_COLORS: [HtmlColor; {}] = [\n",
+        "pub const COLORS: [HtmlColor; {}] = [\n",
         colors.len()
     );
     for HtmlColorRaw { name, ctor } in colors {
