@@ -5,6 +5,10 @@ edition = "2021"
 description = "Color perception difference utilities."
 build = "build/main.rs"
 categories = ["graphics", "algorithms"]
+repository = "https://github.com/woojiq/codi"
+keywords = ["color", "html", "closest-color", "perceptual-uniform"]
 
 [dependencies]
+colored = "2.1.0"
+lexopt = "0.3.0"
 ordered-float = "4.2.0"

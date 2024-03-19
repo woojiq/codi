@@ -43,8 +43,8 @@ const fn __split_colors_arr<const N: usize>() -> ([&'static str; N], [Rgb; N]) {
 /**
     Find closest to target color from list of named html colors.
 */
-#[allow(clippy::missing_panics_doc)]
-pub fn find_closest<T: ColorDistance>(_alg: &T, target: Rgb) -> HtmlColor {
+#[allow(clippy::missing_panics_doc, clippy::needless_pass_by_value)]
+pub fn find_closest<T: ColorDistance>(_alg: T, target: Rgb) -> HtmlColor {
     let idx = T::find_closest(target, &ONLY_COLORS)
         .expect("SAFETY: we have assert for const array ONLY_COLORS length");
     COLORS[idx]

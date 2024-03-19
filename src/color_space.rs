@@ -1,9 +1,33 @@
+const HEX_COLOR_LEN: usize = 6;
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Rgb {
     pub r: u8,
     pub g: u8,
     pub b: u8,
 }
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Error {
+    HexColorWrongLen(usize),
+    NotAsciiHexDigit(u8),
+}
+
+impl std::fmt::Display for Error {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::result::Result<(), std::fmt::Error> {
+        match self {
+            Self::HexColorWrongLen(_len) => write!(f,
+                "The length of hex string must be {} or {} if the first character is '#'",
+                HEX_COLOR_LEN, HEX_COLOR_LEN + 1
+            ),
+            Self::NotAsciiHexDigit(dig) => write!(f, "{dig} is not ascii hexadecimal digit"),
+        }
+    }
+}
+
+impl std::error::Error for Error {}
+
+type Result<T> = std::result::Result<T, Error>;
 
 impl Rgb {
     pub const fn new(red: u8, green: u8, blue: u8) -> Self {
@@ -13,20 +37,59 @@ impl Rgb {
             b: blue,
         }
     }
+}
 
-    pub fn from_hex(hex: &[u8]) -> Option<Self> {
-        const HEX_COLOR_LEN: usize = 6;
+impl std::str::FromStr for Rgb {
+    type Err = Error;
 
-        let start_from: usize = usize::from(hex.first() == Some(&b'#'));
+    fn from_str(value: &str) -> std::result::Result<Self, Self::Err> {
+        value.as_bytes().try_into()
+    }
+}
 
-        if hex.len() != HEX_COLOR_LEN + start_from {
-            return None;
-        }
+impl TryFrom<&str> for Rgb {
+    type Error = Error;
 
-        Some(Self {
-            r: u8_from_two_hex(*hex.get(start_from)?, *hex.get(start_from + 1)?)?,
-            g: u8_from_two_hex(*hex.get(start_from + 2)?, *hex.get(start_from + 3)?)?,
-            b: u8_from_two_hex(*hex.get(start_from + 4)?, *hex.get(start_from + 5)?)?,
+    /**
+        Convert hex colors into Rgb.
+
+        Hex strings format can be either with leading '#' symbol or not.
+
+        # Example
+
+        ```
+        use codi::color_space::Rgb;
+        assert_eq!("#00a0f0".try_into(), Ok(Rgb::new(0, 160, 240)));
+        assert_eq!("fFfFfF".try_into(), Ok(Rgb::new(255, 255, 255)));
+        ```
+    */
+    fn try_from(value: &str) -> std::result::Result<Self, Self::Error> {
+        value.as_bytes().try_into()
+    }
+}
+
+impl TryFrom<&[u8]> for Rgb {
+    type Error = Error;
+
+    fn try_from(value: &[u8]) -> std::result::Result<Self, Self::Error> {
+        let start_from = usize::from(value.first() == Some(&b'#'));
+
+        let Ok(arr) = <[u8; HEX_COLOR_LEN]>::try_from(&value[start_from..]) else {
+            return Err(Error::HexColorWrongLen(value.len()));
+        };
+
+        arr.try_into()
+    }
+}
+
+impl TryFrom<[u8; 6]> for Rgb {
+    type Error = Error;
+
+    fn try_from(value: [u8; 6]) -> std::result::Result<Self, Self::Error> {
+        Ok(Self {
+            r: u8_from_two_hex(value[0], value[1])?,
+            g: u8_from_two_hex(value[2], value[3])?,
+            b: u8_from_two_hex(value[4], value[5])?,
         })
     }
 }
@@ -53,24 +116,22 @@ pub const fn rgb(red: u8, green: u8, blue: u8) -> Rgb {
     Rgb::new(red, green, blue)
 }
 
-const fn u8_from_two_hex(hex1: u8, hex2: u8) -> Option<u8> {
+const fn u8_from_two_hex(hex1: u8, hex2: u8) -> Result<u8> {
     match (hex_byte_to_dec(hex1), hex_byte_to_dec(hex2)) {
-        (Some(v1), Some(v2)) => Some(v1 * 16 + v2),
-        _ => None
+        (Ok(v1), Ok(v2)) => Ok(v1 * 16 + v2),
+        (Err(err), _) | (_, Err(err)) => Err(err),
     }
 }
 
 /**
-    Converts hex byte to the decimal number.
-
-    The hex byte must be a **byte** instead of a number. `b'0'` and not `0`.
+    Converts ascii hex digit to the decimal number.
 */
-const fn hex_byte_to_dec(hex: u8) -> Option<u8> {
+const fn hex_byte_to_dec(hex: u8) -> Result<u8> {
     match hex {
-        b'0'..=b'9' => Some(hex - b'0'),
-        b'a'..=b'f' => Some(hex - b'a' + 10),
-        b'A'..=b'F' => Some(hex - b'A' + 10),
-        _ => None,
+        b'0'..=b'9' => Ok(hex - b'0'),
+        b'a'..=b'f' => Ok(hex - b'a' + 10),
+        b'A'..=b'F' => Ok(hex - b'A' + 10),
+        _ => Err(Error::NotAsciiHexDigit(hex)),
     }
 }
 
@@ -91,58 +152,58 @@ mod test {
             ("#abcdef", rgb(171, 205, 239)),
         ];
         for (case, expected) in tests {
-            from_hex_assert_some(&case, expected);
-            from_hex_assert_some(&case.to_ascii_lowercase(), expected);
-            from_hex_assert_some(&case.to_ascii_uppercase(), expected);
-            from_hex_assert_some(&case[1..].to_ascii_lowercase(), expected);
-            from_hex_assert_some(&case[1..].to_ascii_uppercase(), expected);
+            from_hex_assert_ok(&case, expected);
+            from_hex_assert_ok(&case.to_ascii_lowercase(), expected);
+            from_hex_assert_ok(&case.to_ascii_uppercase(), expected);
+            from_hex_assert_ok(&case[1..].to_ascii_lowercase(), expected);
+            from_hex_assert_ok(&case[1..].to_ascii_uppercase(), expected);
         }
     }
 
-    fn from_hex_assert_some(input: &str, expected: Rgb) {
-        assert_eq!(Rgb::from_hex(input.as_bytes()), Some(expected), "input: {input}");
+    fn from_hex_assert_ok(input: &str, expected: Rgb) {
+        assert_eq!(Rgb::try_from(input.as_bytes()), Ok(expected), "input: {input}");
     }
 
     #[test]
-    fn test_rgb_from_hex_none() {
+    fn test_rgb_from_hex_error() {
         let tests = [
             "0000000", "#00000", "#00000g", "-000000",
             "#123 45", "123456 "
         ];
         for test in tests {
-            assert!(Rgb::from_hex(test.as_bytes()).is_none(), "input: {test}");
+            assert!(Rgb::try_from(test.as_bytes()).is_err(), "input: {test}");
         }
     }
 
     #[test]
-    fn test_hex_byte_to_dec_some() {
-        assert_eq!(hex_byte_to_dec(b'0'), Some(0));
-        assert_eq!(hex_byte_to_dec(b'1'), Some(1));
-        assert_eq!(hex_byte_to_dec(b'9'), Some(9));
-        assert_eq!(hex_byte_to_dec(b'a'), Some(10));
-        assert_eq!(hex_byte_to_dec(b'A'), Some(10));
-        assert_eq!(hex_byte_to_dec(b'f'), Some(15));
-        assert_eq!(hex_byte_to_dec(b'F'), Some(15));
+    fn test_hex_byte_to_dec_ok() {
+        assert_eq!(hex_byte_to_dec(b'0'), Ok(0));
+        assert_eq!(hex_byte_to_dec(b'1'), Ok(1));
+        assert_eq!(hex_byte_to_dec(b'9'), Ok(9));
+        assert_eq!(hex_byte_to_dec(b'a'), Ok(10));
+        assert_eq!(hex_byte_to_dec(b'A'), Ok(10));
+        assert_eq!(hex_byte_to_dec(b'f'), Ok(15));
+        assert_eq!(hex_byte_to_dec(b'F'), Ok(15));
     }
 
     #[test]
-    fn test_hex_byte_to_dec_none() {
-        assert!(hex_byte_to_dec(0).is_none());
-        assert!(hex_byte_to_dec(9).is_none());
-        assert!(hex_byte_to_dec(b'0' - 1).is_none());
-        assert!(hex_byte_to_dec(b'a' - 1).is_none());
-        assert!(hex_byte_to_dec(b'A' - 1).is_none());
-        assert!(hex_byte_to_dec(b'f' + 1).is_none());
-        assert!(hex_byte_to_dec(b'F' + 1).is_none());
+    fn test_hex_byte_to_dec_error() {
+        assert!(hex_byte_to_dec(0).is_err());
+        assert!(hex_byte_to_dec(9).is_err());
+        assert!(hex_byte_to_dec(b'0' - 1).is_err());
+        assert!(hex_byte_to_dec(b'a' - 1).is_err());
+        assert!(hex_byte_to_dec(b'A' - 1).is_err());
+        assert!(hex_byte_to_dec(b'f' + 1).is_err());
+        assert!(hex_byte_to_dec(b'F' + 1).is_err());
     }
 
     #[test]
-    fn test_u8_from_two_hex() {
-        assert_eq!(u8_from_two_hex(b'0', b'0'), Some(0));
-        assert_eq!(u8_from_two_hex(b'0', b'1'), Some(1));
-        assert_eq!(u8_from_two_hex(b'1', b'0'), Some(16));
-        assert_eq!(u8_from_two_hex(b'0', b'a'), Some(10));
-        assert_eq!(u8_from_two_hex(b'a', b'0'), Some(160));
-        assert_eq!(u8_from_two_hex(b'f', b'f'), Some(255));
+    fn test_u8_from_two_hex_ok() {
+        assert_eq!(u8_from_two_hex(b'0', b'0'), Ok(0));
+        assert_eq!(u8_from_two_hex(b'0', b'1'), Ok(1));
+        assert_eq!(u8_from_two_hex(b'1', b'0'), Ok(16));
+        assert_eq!(u8_from_two_hex(b'0', b'a'), Ok(10));
+        assert_eq!(u8_from_two_hex(b'a', b'0'), Ok(160));
+        assert_eq!(u8_from_two_hex(b'f', b'f'), Ok(255));
     }
 }
