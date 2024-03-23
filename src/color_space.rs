@@ -1,11 +1,7 @@
-const HEX_COLOR_LEN: usize = 6;
+// TODO uppercase Rgb, Xyz
+use ordered_float::NotNan;
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub struct Rgb {
-    pub r: u8,
-    pub g: u8,
-    pub b: u8,
-}
+const HEX_COLOR_LEN: usize = 6;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Error {
@@ -29,12 +25,29 @@ impl std::error::Error for Error {}
 
 type Result<T> = std::result::Result<T, Error>;
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct Rgb {
+    pub r: u8,
+    pub g: u8,
+    pub b: u8,
+}
+
 impl Rgb {
     pub const fn new(red: u8, green: u8, blue: u8) -> Self {
         Self {
             r: red,
             g: green,
             b: blue,
+        }
+    }
+
+    pub fn for_each<F: Fn(Self)>(func: F) {
+        for r in 0..=u8::MAX {
+            for g in 0..=u8::MAX {
+                for b in 0..=u8::MAX {
+                    func(Self::new(r, g, b));
+                } 
+            }
         }
     }
 }
@@ -114,6 +127,109 @@ impl std::fmt::UpperHex for Rgb {
 
 pub const fn rgb(red: u8, green: u8, blue: u8) -> Rgb {
     Rgb::new(red, green, blue)
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+struct Xyz {
+    x: NotNan<f32>,
+    y: NotNan<f32>,
+    z: NotNan<f32>,
+}
+
+#[allow(clippy::fallible_impl_from)]
+impl From<Rgb> for Xyz {
+    /// <https://en.wikipedia.org/wiki/SRGB#From_sRGB_to_CIE_XYZ>
+    fn from(value: Rgb) -> Self {
+        // http://www.brucelindbloom.com/index.html?Eqn_RGB_XYZ_Matrix.html
+        const COEF: [[f32; 3]; 3] = [
+            [0.4124, 0.3576, 0.1805],
+            [0.2126, 0.7152, 0.0722],
+            [0.0193, 0.1192, 0.9505],
+        ];
+
+        let (r, g, b) = (
+            f32::from(value.r) / 255.0,
+            f32::from(value.g) / 255.0,
+            f32::from(value.b) / 255.0
+        );
+
+        let to_linear = |col: f32| {
+            if col <= 0.04045 { col / 12.92 }
+            else { ((col + 0.055) / 1.055).powf(2.4) }
+        };
+
+        let lin_col: [[f32; 1]; 3] = [
+            [to_linear(r)],
+            [to_linear(g)],
+            [to_linear(b)],
+        ];
+        assert_eq!(lin_col.len(), COEF[0].len());
+
+        let mut res: [[f32; 1]; 3] = [[0.0], [0.0], [0.0]];
+
+        // TODO: separate function for matrix multiplication
+        #[allow(clippy::needless_range_loop)]
+        for i in 0..COEF.len() {
+            for j in 0..lin_col[0].len() {
+                for k in 0..COEF[0].len() {
+                    res[i][j] += COEF[i][k] * lin_col[k][j];
+                }
+            }
+        }
+
+        Self {
+            x: NotNan::new(res[0][0]).unwrap(),
+            y: NotNan::new(res[1][0]).unwrap(),
+            z: NotNan::new(res[2][0]).unwrap(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Lab {
+    pub l: NotNan<f32>,
+    pub a: NotNan<f32>,
+    pub b: NotNan<f32>,
+}
+
+#[allow(clippy::fallible_impl_from)]
+impl From<Xyz> for Lab {
+    #[allow(non_upper_case_globals, non_snake_case)]
+    #[allow(clippy::many_single_char_names)]
+    fn from(value: Xyz) -> Self {
+        const Xn: f32 = 95.0489;
+        const Yn: f32 = 100.;
+        const Zn: f32 = 108.884;
+
+        const DELTA: f32 = 6.0 / 29.0;
+        let DELTA_3 = DELTA.powi(3);
+        let DELTA_M2 = DELTA.powi(-2);
+
+        let f = |t: f32| {
+            if t > DELTA_3 { t.cbrt() }
+            else { 1.0 / 3.0 * t.mul_add(DELTA_M2, 4.0 / 29.0) }
+        };
+
+        let (x, y, z) = (value.x.into_inner(), value.y.into_inner(), value.z.into_inner());
+
+        let (L, a, b) = (
+            116.0_f32.mul_add(f(y / Yn), -16.0),
+            500.0_f32.mul_add(f(x / Xn), -f(y / Yn)),
+            200.0_f32.mul_add(f(y / Yn), -f(z / Zn)),
+        );
+
+        Self {
+            l: NotNan::new(L).unwrap(),
+            a: NotNan::new(a).unwrap(),
+            b: NotNan::new(b).unwrap(),
+        }
+    }
+}
+
+impl From<Rgb> for Lab {
+    fn from(value: Rgb) -> Self {
+        Xyz::from(value).into()
+    }
 }
 
 const fn u8_from_two_hex(hex1: u8, hex2: u8) -> Result<u8> {
@@ -205,5 +321,13 @@ mod test {
         assert_eq!(u8_from_two_hex(b'0', b'a'), Ok(10));
         assert_eq!(u8_from_two_hex(b'a', b'0'), Ok(160));
         assert_eq!(u8_from_two_hex(b'f', b'f'), Ok(255));
+    }
+
+    #[test]
+    #[ignore]
+    fn test_lab_from_rgb_not_panic() {
+        Rgb::for_each(|color: Rgb| {
+            let _ = Lab::from(color);
+        })
     }
 }

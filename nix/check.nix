@@ -14,6 +14,7 @@
       -W clippy::nursery \
       -W clippy::cargo \
       -A clippy::must_use_candidate \
+      -A clippy::suboptimal_flops \
   '';
   clippyWithText = text:
     pkgs.writeShellApplication {

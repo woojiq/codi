@@ -37,6 +37,8 @@
         doCheck = false;
       };
 
+      # TODO: cargo test -- --ignored
+      # TODO: add clippy lints to the code and here just run -D warnings
       checks.default = self.packages.${system}.default.overrideAttrs (
         finalAttrs: previousAttrs: {
           nativeCheckInputs = [
