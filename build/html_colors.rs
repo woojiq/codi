@@ -9,7 +9,7 @@ struct HtmlColorRaw<'a> {
     File line format: "aliceblue rgb(240, 248, 255)". Comments and empty lines are allowed.
 
     # Generates:
-        * constants for each color, e.g, "const INDIANRED: Rgb = rgb(x, y, z);"
+        * constants for each color, e.g, "const INDIANRED: RGB = rgb(x, y, z);"
         * array with each html color
 */
 pub fn generate() {
@@ -57,7 +57,7 @@ fn parse_html_colors(content: &str) -> Vec<HtmlColorRaw> {
 fn separate_const_for_each_color(buff: &mut String, colors: &[HtmlColorRaw]) {
     for HtmlColorRaw { name, ctor } in colors {
         *buff += &format!(
-            "pub const {}: Rgb = {};\n",
+            "pub const {}: RGB = {};\n",
             name.to_ascii_uppercase(), ctor
         );
     }
@@ -69,7 +69,7 @@ fn array_with_all_colors(buff: &mut String, colors: &[HtmlColorRaw]) {
         colors.len()
     );
     for HtmlColorRaw { name, ctor } in colors {
-        *buff += &format!("\t(\"{name}\", {ctor}),\n");
+        *buff += &format!("\tHtmlColor {{name: \"{name}\", color: {ctor}}},\n");
     }
     *buff += "];\n";
 }

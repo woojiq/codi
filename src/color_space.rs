@@ -1,4 +1,5 @@
-// TODO uppercase Rgb, Xyz
+#![allow(clippy::upper_case_acronyms)]
+
 use ordered_float::NotNan;
 
 const HEX_COLOR_LEN: usize = 6;
@@ -9,8 +10,8 @@ pub enum Error {
     NotAsciiHexDigit(u8),
 }
 
-impl std::fmt::Display for Error {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::result::Result<(), std::fmt::Error> {
+impl core::fmt::Display for Error {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::result::Result<(), core::fmt::Error> {
         match self {
             Self::HexColorWrongLen(_len) => write!(f,
                 "The length of hex string must be {} or {} if the first character is '#'",
@@ -23,16 +24,16 @@ impl std::fmt::Display for Error {
 
 impl std::error::Error for Error {}
 
-type Result<T> = std::result::Result<T, Error>;
+type Result<T> = core::result::Result<T, Error>;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub struct Rgb {
+pub struct RGB {
     pub r: u8,
     pub g: u8,
     pub b: u8,
 }
 
-impl Rgb {
+impl RGB {
     pub const fn new(red: u8, green: u8, blue: u8) -> Self {
         Self {
             r: red,
@@ -52,39 +53,39 @@ impl Rgb {
     }
 }
 
-impl std::str::FromStr for Rgb {
+impl core::str::FromStr for RGB {
     type Err = Error;
 
-    fn from_str(value: &str) -> std::result::Result<Self, Self::Err> {
+    fn from_str(value: &str) -> core::result::Result<Self, Self::Err> {
         value.as_bytes().try_into()
     }
 }
 
-impl TryFrom<&str> for Rgb {
+impl TryFrom<&str> for RGB {
     type Error = Error;
 
     /**
-        Convert hex colors into Rgb.
+        Convert hex colors into RGB.
 
         Hex strings format can be either with leading '#' symbol or not.
 
         # Example
 
         ```
-        use codi::color_space::Rgb;
-        assert_eq!("#00a0f0".try_into(), Ok(Rgb::new(0, 160, 240)));
-        assert_eq!("fFfFfF".try_into(), Ok(Rgb::new(255, 255, 255)));
+        use codi::color_space::RGB;
+        assert_eq!("#00a0f0".try_into(), Ok(RGB::new(0, 160, 240)));
+        assert_eq!("fFfFfF".try_into(), Ok(RGB::new(255, 255, 255)));
         ```
     */
-    fn try_from(value: &str) -> std::result::Result<Self, Self::Error> {
+    fn try_from(value: &str) -> core::result::Result<Self, Self::Error> {
         value.as_bytes().try_into()
     }
 }
 
-impl TryFrom<&[u8]> for Rgb {
+impl TryFrom<&[u8]> for RGB {
     type Error = Error;
 
-    fn try_from(value: &[u8]) -> std::result::Result<Self, Self::Error> {
+    fn try_from(value: &[u8]) -> core::result::Result<Self, Self::Error> {
         let start_from = usize::from(value.first() == Some(&b'#'));
 
         let Ok(arr) = <[u8; HEX_COLOR_LEN]>::try_from(&value[start_from..]) else {
@@ -95,10 +96,10 @@ impl TryFrom<&[u8]> for Rgb {
     }
 }
 
-impl TryFrom<[u8; 6]> for Rgb {
+impl TryFrom<[u8; 6]> for RGB {
     type Error = Error;
 
-    fn try_from(value: [u8; 6]) -> std::result::Result<Self, Self::Error> {
+    fn try_from(value: [u8; 6]) -> core::result::Result<Self, Self::Error> {
         Ok(Self {
             r: u8_from_two_hex(value[0], value[1])?,
             g: u8_from_two_hex(value[2], value[3])?,
@@ -107,39 +108,39 @@ impl TryFrom<[u8; 6]> for Rgb {
     }
 }
 
-impl std::fmt::Display for Rgb {
-    fn fmt(& self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Rgb({}, {}, {})", self.r, self.g, self.b)
+impl core::fmt::Display for RGB {
+    fn fmt(& self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        write!(f, "RGB({}, {}, {})", self.r, self.g, self.b)
     }
 }
 
-impl std::fmt::LowerHex for Rgb {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::LowerHex for RGB {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         write!(f, "#{:02x}{:02x}{:02x}", self.r, self.g, self.b)
     }
 }
 
-impl std::fmt::UpperHex for Rgb {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::UpperHex for RGB {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         write!(f, "#{:02X}{:02X}{:02X}", self.r, self.g, self.b)
     }
 }
 
-pub const fn rgb(red: u8, green: u8, blue: u8) -> Rgb {
-    Rgb::new(red, green, blue)
+pub const fn rgb(red: u8, green: u8, blue: u8) -> RGB {
+    RGB::new(red, green, blue)
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-struct Xyz {
+struct XYZ {
     x: NotNan<f32>,
     y: NotNan<f32>,
     z: NotNan<f32>,
 }
 
 #[allow(clippy::fallible_impl_from)]
-impl From<Rgb> for Xyz {
+impl From<RGB> for XYZ {
     /// <https://en.wikipedia.org/wiki/SRGB#From_sRGB_to_CIE_XYZ>
-    fn from(value: Rgb) -> Self {
+    fn from(value: RGB) -> Self {
         // http://www.brucelindbloom.com/index.html?Eqn_RGB_XYZ_Matrix.html
         const COEF: [[f32; 3]; 3] = [
             [0.4124, 0.3576, 0.1805],
@@ -178,27 +179,27 @@ impl From<Rgb> for Xyz {
         }
 
         Self {
-            x: NotNan::new(res[0][0]).unwrap(),
-            y: NotNan::new(res[1][0]).unwrap(),
-            z: NotNan::new(res[2][0]).unwrap(),
+            x: NotNan::new(res[0][0] * 100.0).unwrap(),
+            y: NotNan::new(res[1][0] * 100.0).unwrap(),
+            z: NotNan::new(res[2][0] * 100.0).unwrap(),
         }
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct Lab {
+pub struct CIELAB {
     pub l: NotNan<f32>,
     pub a: NotNan<f32>,
     pub b: NotNan<f32>,
 }
 
 #[allow(clippy::fallible_impl_from)]
-impl From<Xyz> for Lab {
+impl From<XYZ> for CIELAB {
     #[allow(non_upper_case_globals, non_snake_case)]
     #[allow(clippy::many_single_char_names)]
-    fn from(value: Xyz) -> Self {
+    fn from(value: XYZ) -> Self {
         const Xn: f32 = 95.0489;
-        const Yn: f32 = 100.;
+        const Yn: f32 = 100.0;
         const Zn: f32 = 108.884;
 
         const DELTA: f32 = 6.0 / 29.0;
@@ -207,15 +208,15 @@ impl From<Xyz> for Lab {
 
         let f = |t: f32| {
             if t > DELTA_3 { t.cbrt() }
-            else { 1.0 / 3.0 * t.mul_add(DELTA_M2, 4.0 / 29.0) }
+            else { 1.0 / 3.0 * t * DELTA_M2 + 4.0 / 29.0 }
         };
 
         let (x, y, z) = (value.x.into_inner(), value.y.into_inner(), value.z.into_inner());
 
         let (L, a, b) = (
-            116.0_f32.mul_add(f(y / Yn), -16.0),
-            500.0_f32.mul_add(f(x / Xn), -f(y / Yn)),
-            200.0_f32.mul_add(f(y / Yn), -f(z / Zn)),
+            116.0 * f(y / Yn) - 16.0,
+            500.0 * (f(x / Xn) - f(y / Yn)),
+            200.0 * (f(y / Yn) - f(z / Zn)),
         );
 
         Self {
@@ -226,9 +227,9 @@ impl From<Xyz> for Lab {
     }
 }
 
-impl From<Rgb> for Lab {
-    fn from(value: Rgb) -> Self {
-        Xyz::from(value).into()
+impl From<RGB> for CIELAB {
+    fn from(value: RGB) -> Self {
+        XYZ::from(value).into()
     }
 }
 
@@ -268,7 +269,7 @@ mod test {
             ("#abcdef", rgb(171, 205, 239)),
         ];
         for (case, expected) in tests {
-            from_hex_assert_ok(&case, expected);
+            from_hex_assert_ok(case, expected);
             from_hex_assert_ok(&case.to_ascii_lowercase(), expected);
             from_hex_assert_ok(&case.to_ascii_uppercase(), expected);
             from_hex_assert_ok(&case[1..].to_ascii_lowercase(), expected);
@@ -276,8 +277,8 @@ mod test {
         }
     }
 
-    fn from_hex_assert_ok(input: &str, expected: Rgb) {
-        assert_eq!(Rgb::try_from(input.as_bytes()), Ok(expected), "input: {input}");
+    fn from_hex_assert_ok(input: &str, expected: RGB) {
+        assert_eq!(RGB::try_from(input.as_bytes()), Ok(expected), "input: {input}");
     }
 
     #[test]
@@ -287,7 +288,7 @@ mod test {
             "#123 45", "123456 "
         ];
         for test in tests {
-            assert!(Rgb::try_from(test.as_bytes()).is_err(), "input: {test}");
+            assert!(RGB::try_from(test.as_bytes()).is_err(), "input: {test}");
         }
     }
 
@@ -326,8 +327,8 @@ mod test {
     #[test]
     #[ignore]
     fn test_lab_from_rgb_not_panic() {
-        Rgb::for_each(|color: Rgb| {
-            let _ = Lab::from(color);
-        })
+        RGB::for_each(|color: RGB| {
+            let _ = CIELAB::from(color);
+        });
     }
 }

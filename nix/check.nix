@@ -3,7 +3,7 @@
   rust,
 }: let
   clippyCommonText = ''
-    cargo clippy --all -- \
+    cargo clippy --all-targets -- \
       -W clippy::all \
       -W clippy::correctness \
       -W clippy::suspicious \

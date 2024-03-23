@@ -1,17 +1,32 @@
-use crate::color_space::{Rgb, rgb};
+use crate::color_space::{RGB, rgb};
 use crate::color_dist::{ColorDistance};
 
-pub type HtmlColor = (&'static str, Rgb);
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct HtmlColor {
+    pub name: &'static str,
+    pub color: RGB,
+}
 
-// Generates consts like `YELLOWGREEN: Rgb`
+// Generates consts like `YELLOWGREEN: RGB`
 // and `COLORS` array that contains all of them.
 include!(concat!(env!("OUT_DIR"), "/contrib/html-color-names.txt.rs"));
 
 pub const ONLY_NAMES: [&str; COLORS.len()] = __split_colors_arr().0;
-pub const ONLY_COLORS: [Rgb; COLORS.len()] = __split_colors_arr().1;
+pub const ONLY_COLORS: [RGB; COLORS.len()] = __split_colors_arr().1;
+pub const MAX_NAME_LEN: usize = {
+    let mut len = 0;
+    let mut idx = 0;
+    while idx < COLORS.len() {
+        if len < COLORS[idx].name.len() {
+            len = COLORS[idx].name.len();
+        }
+        idx += 1;
+    }
+    len
+};
 
 // Modify it when adding new entries to the file.
-const _: () = assert!(COLORS.len() == 147);
+const _: () = assert!(COLORS.len() == 138);
 const _: () = assert!(ONLY_COLORS.len() == COLORS.len());
 const _: () = assert!(ONLY_NAMES.len() == COLORS.len());
 
@@ -29,12 +44,13 @@ const _: () = assert!(ONLY_NAMES.len() == COLORS.len());
       transmutes don't currently work in rustc:
       <https://github.com/rust-lang/rust/issues/61956>
 */
-const fn __split_colors_arr<const N: usize>() -> ([&'static str; N], [Rgb; N]) {
+const fn __split_colors_arr<const N: usize>() -> ([&'static str; N], [RGB; N]) {
     let mut names = [""; N];
-    let mut colors = [Rgb::new(0, 0, 0); N];
+    let mut colors = [RGB::new(0, 0, 0); N];
     let mut idx = 0;
     while idx < N {
-        (names[idx], colors[idx]) = COLORS[idx];
+        names[idx] = COLORS[idx].name;
+        colors[idx] = COLORS[idx].color;
         idx += 1;
     }
     (names, colors)
@@ -43,9 +59,9 @@ const fn __split_colors_arr<const N: usize>() -> ([&'static str; N], [Rgb; N]) {
 /**
     Find closest to target color from list of named html colors.
 */
-#[allow(clippy::missing_panics_doc, clippy::needless_pass_by_value)]
-pub fn find_closest<T: ColorDistance>(_alg: T, target: Rgb) -> HtmlColor {
-    let idx = T::find_closest(target, &ONLY_COLORS)
+#[allow(clippy::missing_panics_doc)]
+pub fn find_closest<T: ColorDistance + ?Sized>(alg: &T, target: RGB) -> HtmlColor {
+    let idx = alg.find_closest(target, &ONLY_COLORS)
         .expect("SAFETY: we have assert for const array ONLY_COLORS length");
     COLORS[idx]
 }

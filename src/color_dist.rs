@@ -1,12 +1,12 @@
 use ordered_float::NotNan;
 
-use crate::color_space::{Rgb, Lab};
+use crate::color_space::{RGB, CIELAB};
 
-pub trait ColorDistance {
+pub trait ColorDistance: core::fmt::Display {
     /**
         Find distance between two colors.
     */
-    fn dist(c1: Rgb, c2: Rgb) -> NotNan<f32>;
+    fn dist(&self, c1: RGB, c2: RGB) -> NotNan<f32>;
 
     /**
         Find closest value to the `target`.
@@ -14,10 +14,32 @@ pub trait ColorDistance {
         # Returns
         Index of the closest value from candidates or [`Option::None`] if slice is empty.
     */
-    fn find_closest(target: Rgb, candidates: &[Rgb]) -> Option<usize> {
+    fn find_closest(&self, target: RGB, candidates: &[RGB]) -> Option<usize> {
          candidates.iter().enumerate()
-            .min_by_key(|(_idx, other)| Self::dist(target, **other))
+            .min_by_key(|(_idx, other)| self.dist(target, **other))
             .map(|(idx, _)| idx)
+    }
+}
+
+pub const ALGORITHMS: [&'static dyn ColorDistance; 3] = [
+    &Euclidean, &EuclideanImproved, &CIE94
+];
+
+#[derive(Debug, Clone, Copy)]
+pub struct Euclidean;
+
+impl ColorDistance for Euclidean {
+    fn dist(&self, c1: RGB, c2: RGB) -> NotNan<f32> {
+        let dist = (f32::from(c1.r) - f32::from(c2.r)).powi(2) +
+                   (f32::from(c1.g) - f32::from(c2.g)).powi(2) +
+                   (f32::from(c1.b) - f32::from(c2.b)).powi(2);
+        NotNan::new(dist).unwrap()
+    }
+}
+
+impl core::fmt::Display for Euclidean {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        write!(f, "Euclidean")
     }
 }
 
@@ -26,7 +48,7 @@ pub trait ColorDistance {
 pub struct EuclideanImproved;
 
 impl ColorDistance for EuclideanImproved {
-    fn dist(c1: Rgb, c2: Rgb) -> NotNan<f32> {
+    fn dist(&self, c1: RGB, c2: RGB) -> NotNan<f32> {
         let red_mean = (f32::from(c1.r) + f32::from(c2.r)) / 2.0;
         let (d_r, d_g, d_b) = (
             (f32::from(c1.r) - f32::from(c2.r)),
@@ -41,27 +63,9 @@ impl ColorDistance for EuclideanImproved {
     }
 }
 
-impl std::fmt::Display for EuclideanImproved {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Display for EuclideanImproved {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         write!(f, "Euclidean Improved")
-    }
-}
-
-#[derive(Debug, Clone, Copy)]
-pub struct Euclidean;
-
-impl ColorDistance for Euclidean {
-    fn dist(c1: Rgb, c2: Rgb) -> NotNan<f32> {
-        let dist = (f32::from(c1.r) - f32::from(c2.r)).powi(2) +
-                   (f32::from(c1.g) - f32::from(c2.g)).powi(2) +
-                   (f32::from(c1.b) - f32::from(c2.b)).powi(2);
-        NotNan::new(dist).unwrap()
-    }
-}
-
-impl std::fmt::Display for Euclidean {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Euclidean")
     }
 }
 
@@ -70,8 +74,8 @@ pub struct CIE94;
 
 impl ColorDistance for CIE94 {
     #[allow(non_upper_case_globals, non_snake_case)]
-    fn dist(c1: Rgb, c2: Rgb) -> NotNan<f32> {
-        let (lab1, lab2) = (Lab::from(c1), Lab::from(c2));
+    fn dist(&self, c1: RGB, c2: RGB) -> NotNan<f32> {
+        let (lab1, lab2) = (CIELAB::from(c1), CIELAB::from(c2));
 
         let (kL, K1, K2) = (1.0, 0.045, 0.015);
         let (kC, kH) = (1.0, 1.0);
@@ -92,15 +96,15 @@ impl ColorDistance for CIE94 {
         // https://github.com/zschuessler/DeltaE/issues/9
         let Hab = (delta_a.powi(2) + delta_b.powi(2) - Cab.powi(2)).max(0.0).sqrt();
 
-        let E94 = (delta_l / (kL * Sl)).powi(2) +
+        let dist = (delta_l / (kL * Sl)).powi(2) +
                   (Cab / (kC * Sc)).powi(2) +
                   (Hab / (kH * Sh)).powi(2);
-        NotNan::new(E94).unwrap()
+        NotNan::new(dist).unwrap()
     }
 }
 
-impl std::fmt::Display for CIE94 {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Display for CIE94 {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         write!(f, "CIE94")
     }
 }
@@ -109,19 +113,22 @@ impl std::fmt::Display for CIE94 {
 mod test {
     use super::*;
 
-    use crate::color_space::{Rgb, rgb};
+    use crate::color_space::{rgb};
+
+    // #564C55 - Euclidean/Improved not OK
+    // #2C1218
 
     #[test]
-    fn test_basic_human_eye() {
-        assert_eq!(EuclideanImproved::find_closest(
-            rgb(255, 192, 203),
-            &[rgb(255, 0, 0), rgb(255, 105, 180), rgb(250, 128, 114),
-            rgb(199, 21, 133), rgb(255, 165, 0),]),
-        Some(1));
+    fn test_basic() {
+        assert_eq!(
+            CIE94.find_closest(rgb(86, 76, 85),
+            &[rgb(47, 79, 79), rgb(105, 105, 105)]),
+            Some(1)
+        );
     }
 
     #[test]
     fn test_cie_94_not_panic() {
-        CIE94::dist(rgb(0, 0, 0), rgb(0, 0, 1));
+        CIE94.dist(rgb(0, 0, 0), rgb(0, 0, 1));
     }
 }

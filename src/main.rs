@@ -15,6 +15,10 @@ fn main() {
         println!("{VERSION}");
         return;
     }
+    if args.all_html {
+        codi::print_all_html_colors();
+        return;
+    }
 
     if let Some(color) = args.color {
         codi::run(color);
@@ -36,5 +40,8 @@ Args:
     <color> Hex color, e.g. \"#000000\" or \"ffffff\"
 
 Options:
+    --help                  Prints help information
+    --version               Prints version
+    --all-html              Prints and displays all html color names
     ")
 }
