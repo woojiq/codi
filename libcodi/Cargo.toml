@@ -1,0 +1,14 @@
+[package]
+name = "codi"
+version.workspace = true
+edition.workspace = true
+categories.workspace = true
+repository.workspace = true
+keywords.workspace = true
+build = "build/main.rs"
+
+[dependencies]
+ordered-float = { version = "4.2.0" }
+
+[lints]
+workspace = true

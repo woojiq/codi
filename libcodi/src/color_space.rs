@@ -4,7 +4,7 @@ use ordered_float::NotNan;
 
 const HEX_COLOR_LEN: usize = 6;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Error {
     HexColorWrongLen(usize),
     NotAsciiHexDigit(u8),
@@ -26,14 +26,14 @@ impl std::error::Error for Error {}
 
 type Result<T> = core::result::Result<T, Error>;
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub struct RGB {
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub struct Rgb {
     pub r: u8,
     pub g: u8,
     pub b: u8,
 }
 
-impl RGB {
+impl Rgb {
     pub const fn new(red: u8, green: u8, blue: u8) -> Self {
         Self {
             r: red,
@@ -53,7 +53,7 @@ impl RGB {
     }
 }
 
-impl core::str::FromStr for RGB {
+impl core::str::FromStr for Rgb {
     type Err = Error;
 
     fn from_str(value: &str) -> core::result::Result<Self, Self::Err> {
@@ -61,20 +61,20 @@ impl core::str::FromStr for RGB {
     }
 }
 
-impl TryFrom<&str> for RGB {
+impl TryFrom<&str> for Rgb {
     type Error = Error;
 
     /**
-        Convert hex colors into RGB.
+        Convert hex colors into Rgb.
 
         Hex strings format can be either with leading '#' symbol or not.
 
         # Example
 
         ```
-        use codi::color_space::RGB;
-        assert_eq!("#00a0f0".try_into(), Ok(RGB::new(0, 160, 240)));
-        assert_eq!("fFfFfF".try_into(), Ok(RGB::new(255, 255, 255)));
+        use codi::color_space::Rgb;
+        assert_eq!("#00a0f0".try_into(), Ok(Rgb::new(0, 160, 240)));
+        assert_eq!("fFfFfF".try_into(), Ok(Rgb::new(255, 255, 255)));
         ```
     */
     fn try_from(value: &str) -> core::result::Result<Self, Self::Error> {
@@ -82,7 +82,7 @@ impl TryFrom<&str> for RGB {
     }
 }
 
-impl TryFrom<&[u8]> for RGB {
+impl TryFrom<&[u8]> for Rgb {
     type Error = Error;
 
     fn try_from(value: &[u8]) -> core::result::Result<Self, Self::Error> {
@@ -96,7 +96,7 @@ impl TryFrom<&[u8]> for RGB {
     }
 }
 
-impl TryFrom<[u8; 6]> for RGB {
+impl TryFrom<[u8; 6]> for Rgb {
     type Error = Error;
 
     fn try_from(value: [u8; 6]) -> core::result::Result<Self, Self::Error> {
@@ -108,40 +108,40 @@ impl TryFrom<[u8; 6]> for RGB {
     }
 }
 
-impl core::fmt::Display for RGB {
+impl core::fmt::Display for Rgb {
     fn fmt(& self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        write!(f, "RGB({}, {}, {})", self.r, self.g, self.b)
+        write!(f, "Rgb({}, {}, {})", self.r, self.g, self.b)
     }
 }
 
-impl core::fmt::LowerHex for RGB {
+impl core::fmt::LowerHex for Rgb {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         write!(f, "#{:02x}{:02x}{:02x}", self.r, self.g, self.b)
     }
 }
 
-impl core::fmt::UpperHex for RGB {
+impl core::fmt::UpperHex for Rgb {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         write!(f, "#{:02X}{:02X}{:02X}", self.r, self.g, self.b)
     }
 }
 
-pub const fn rgb(red: u8, green: u8, blue: u8) -> RGB {
-    RGB::new(red, green, blue)
+pub const fn rgb(red: u8, green: u8, blue: u8) -> Rgb {
+    Rgb::new(red, green, blue)
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-struct XYZ {
-    x: NotNan<f32>,
-    y: NotNan<f32>,
-    z: NotNan<f32>,
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub struct Xyz {
+    pub x: NotNan<f32>,
+    pub y: NotNan<f32>,
+    pub z: NotNan<f32>,
 }
 
 #[allow(clippy::fallible_impl_from)]
-impl From<RGB> for XYZ {
-    /// <https://en.wikipedia.org/wiki/SRGB#From_sRGB_to_CIE_XYZ>
-    fn from(value: RGB) -> Self {
-        // http://www.brucelindbloom.com/index.html?Eqn_RGB_XYZ_Matrix.html
+impl From<Rgb> for Xyz {
+    /// <https://en.wikipedia.org/wiki/SRgb#From_sRgb_to_CIE_XYZ>
+    fn from(value: Rgb) -> Self {
+        // http://www.brucelindbloom.com/index.html?Eqn_Rgb_XYZ_Matrix.html
         const COEF: [[f32; 3]; 3] = [
             [0.4124, 0.3576, 0.1805],
             [0.2126, 0.7152, 0.0722],
@@ -186,18 +186,18 @@ impl From<RGB> for XYZ {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct CIELAB {
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct Cielab {
     pub l: NotNan<f32>,
     pub a: NotNan<f32>,
     pub b: NotNan<f32>,
 }
 
 #[allow(clippy::fallible_impl_from)]
-impl From<XYZ> for CIELAB {
+impl From<Xyz> for Cielab {
     #[allow(non_upper_case_globals, non_snake_case)]
     #[allow(clippy::many_single_char_names)]
-    fn from(value: XYZ) -> Self {
+    fn from(value: Xyz) -> Self {
         const Xn: f32 = 95.0489;
         const Yn: f32 = 100.0;
         const Zn: f32 = 108.884;
@@ -227,9 +227,9 @@ impl From<XYZ> for CIELAB {
     }
 }
 
-impl From<RGB> for CIELAB {
-    fn from(value: RGB) -> Self {
-        XYZ::from(value).into()
+impl From<Rgb> for Cielab {
+    fn from(value: Rgb) -> Self {
+        Xyz::from(value).into()
     }
 }
 
@@ -277,8 +277,8 @@ mod test {
         }
     }
 
-    fn from_hex_assert_ok(input: &str, expected: RGB) {
-        assert_eq!(RGB::try_from(input.as_bytes()), Ok(expected), "input: {input}");
+    fn from_hex_assert_ok(input: &str, expected: Rgb) {
+        assert_eq!(Rgb::try_from(input.as_bytes()), Ok(expected), "input: {input}");
     }
 
     #[test]
@@ -288,7 +288,7 @@ mod test {
             "#123 45", "123456 "
         ];
         for test in tests {
-            assert!(RGB::try_from(test.as_bytes()).is_err(), "input: {test}");
+            assert!(Rgb::try_from(test.as_bytes()).is_err(), "input: {test}");
         }
     }
 
@@ -327,8 +327,8 @@ mod test {
     #[test]
     #[ignore]
     fn test_lab_from_rgb_not_panic() {
-        RGB::for_each(|color: RGB| {
-            let _ = CIELAB::from(color);
+        Rgb::for_each(|color: Rgb| {
+            let _ = Cielab::from(color);
         });
     }
 }

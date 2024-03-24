@@ -1,18 +1,18 @@
-use crate::color_space::{RGB, rgb};
+use crate::color_space::{Rgb, rgb};
 use crate::color_dist::{ColorDistance};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct HtmlColor {
     pub name: &'static str,
-    pub color: RGB,
+    pub color: Rgb,
 }
 
-// Generates consts like `YELLOWGREEN: RGB`
+// Generates consts like `YELLOWGREEN: Rgb`
 // and `COLORS` array that contains all of them.
 include!(concat!(env!("OUT_DIR"), "/contrib/html-color-names.txt.rs"));
 
 pub const ONLY_NAMES: [&str; COLORS.len()] = __split_colors_arr().0;
-pub const ONLY_COLORS: [RGB; COLORS.len()] = __split_colors_arr().1;
+pub const ONLY_COLORS: [Rgb; COLORS.len()] = __split_colors_arr().1;
 pub const MAX_NAME_LEN: usize = {
     let mut len = 0;
     let mut idx = 0;
@@ -44,9 +44,9 @@ const _: () = assert!(ONLY_NAMES.len() == COLORS.len());
       transmutes don't currently work in rustc:
       <https://github.com/rust-lang/rust/issues/61956>
 */
-const fn __split_colors_arr<const N: usize>() -> ([&'static str; N], [RGB; N]) {
+const fn __split_colors_arr<const N: usize>() -> ([&'static str; N], [Rgb; N]) {
     let mut names = [""; N];
-    let mut colors = [RGB::new(0, 0, 0); N];
+    let mut colors = [Rgb::new(0, 0, 0); N];
     let mut idx = 0;
     while idx < N {
         names[idx] = COLORS[idx].name;
@@ -60,7 +60,7 @@ const fn __split_colors_arr<const N: usize>() -> ([&'static str; N], [RGB; N]) {
     Find closest to target color from list of named html colors.
 */
 #[allow(clippy::missing_panics_doc)]
-pub fn find_closest<T: ColorDistance + ?Sized>(alg: &T, target: RGB) -> HtmlColor {
+pub fn find_closest<T: ColorDistance + ?Sized>(alg: &T, target: Rgb) -> HtmlColor {
     let idx = alg.find_closest(target, &ONLY_COLORS)
         .expect("SAFETY: we have assert for const array ONLY_COLORS length");
     COLORS[idx]

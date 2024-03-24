@@ -1,8 +1,6 @@
-use crate::color_space::RGB;
-
 #[derive(Default)]
 pub struct Args {
-    pub color: Option<RGB>,
+    pub color: Option<codi::color_space::Rgb>,
     pub help: bool,
     pub version: bool,
     pub all_html: bool,

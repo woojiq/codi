@@ -16,7 +16,6 @@
       rust = pkgs.rust-bin.fromRustupToolchainFile ../rust-toolchain.toml;
 
       cargoToml = builtins.fromTOML (builtins.readFile ../Cargo.toml);
-      check = import ./check.nix {inherit pkgs rust;};
 
       rustPlatform = pkgs.makeRustPlatform {
         cargo = rust;
@@ -31,24 +30,21 @@
         inherit nativeBuildInputs;
 
         pname = cargoToml.package.name;
-        version = cargoToml.package.version;
+        version = cargoToml.workspace.package.version;
         src = ./..;
         cargoLock.lockFile = ../Cargo.lock;
         doCheck = false;
       };
 
-      # TODO: cargo test -- --ignored
-      # TODO: add clippy lints to the code and here just run -D warnings
       checks.default = self.packages.${system}.default.overrideAttrs (
         finalAttrs: previousAttrs: {
           nativeCheckInputs = [
             rust
-            check.clippy-deny
           ];
           doCheck = true;
           checkPhase = ''
-            cargo test
-            run-clippy
+            cargo clippy -- -D warnings
+            cargo test --workspace -- --include-ignored
           '';
         }
       );
@@ -61,8 +57,6 @@
               gdb
               cargo-mutants
               cargo-tarpaulin
-
-              check.clippy-warn
 
               hyprpicker
             ]

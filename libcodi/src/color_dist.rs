@@ -1,12 +1,12 @@
 use ordered_float::NotNan;
 
-use crate::color_space::{RGB, CIELAB};
+use crate::color_space::{Rgb, Cielab};
 
 pub trait ColorDistance: core::fmt::Display {
     /**
         Find distance between two colors.
     */
-    fn dist(&self, c1: RGB, c2: RGB) -> NotNan<f32>;
+    fn dist(&self, c1: Rgb, c2: Rgb) -> NotNan<f32>;
 
     /**
         Find closest value to the `target`.
@@ -14,7 +14,7 @@ pub trait ColorDistance: core::fmt::Display {
         # Returns
         Index of the closest value from candidates or [`Option::None`] if slice is empty.
     */
-    fn find_closest(&self, target: RGB, candidates: &[RGB]) -> Option<usize> {
+    fn find_closest(&self, target: Rgb, candidates: &[Rgb]) -> Option<usize> {
          candidates.iter().enumerate()
             .min_by_key(|(_idx, other)| self.dist(target, **other))
             .map(|(idx, _)| idx)
@@ -29,7 +29,7 @@ pub const ALGORITHMS: [&'static dyn ColorDistance; 3] = [
 pub struct Euclidean;
 
 impl ColorDistance for Euclidean {
-    fn dist(&self, c1: RGB, c2: RGB) -> NotNan<f32> {
+    fn dist(&self, c1: Rgb, c2: Rgb) -> NotNan<f32> {
         let dist = (f32::from(c1.r) - f32::from(c2.r)).powi(2) +
                    (f32::from(c1.g) - f32::from(c2.g)).powi(2) +
                    (f32::from(c1.b) - f32::from(c2.b)).powi(2);
@@ -48,7 +48,7 @@ impl core::fmt::Display for Euclidean {
 pub struct EuclideanImproved;
 
 impl ColorDistance for EuclideanImproved {
-    fn dist(&self, c1: RGB, c2: RGB) -> NotNan<f32> {
+    fn dist(&self, c1: Rgb, c2: Rgb) -> NotNan<f32> {
         let red_mean = (f32::from(c1.r) + f32::from(c2.r)) / 2.0;
         let (d_r, d_g, d_b) = (
             (f32::from(c1.r) - f32::from(c2.r)),
@@ -74,8 +74,8 @@ pub struct CIE94;
 
 impl ColorDistance for CIE94 {
     #[allow(non_upper_case_globals, non_snake_case)]
-    fn dist(&self, c1: RGB, c2: RGB) -> NotNan<f32> {
-        let (lab1, lab2) = (CIELAB::from(c1), CIELAB::from(c2));
+    fn dist(&self, c1: Rgb, c2: Rgb) -> NotNan<f32> {
+        let (lab1, lab2) = (Cielab::from(c1), Cielab::from(c2));
 
         let (kL, K1, K2) = (1.0, 0.045, 0.015);
         let (kC, kH) = (1.0, 1.0);

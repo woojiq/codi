@@ -9,13 +9,15 @@ struct HtmlColorRaw<'a> {
     File line format: "aliceblue rgb(240, 248, 255)". Comments and empty lines are allowed.
 
     # Generates:
-        * constants for each color, e.g, "const INDIANRED: RGB = rgb(x, y, z);"
+        * constants for each color, e.g, "const INDIANRED: Rgb = rgb(x, y, z);"
         * array with each html color
 */
 pub fn generate() {
     const HTML_NAMES_PATH: &str = "contrib/html-color-names.txt";
 
-    let content = std::fs::read_to_string(HTML_NAMES_PATH).unwrap();
+    let content = std::fs::read_to_string(
+        std::path::Path::new("..").join(HTML_NAMES_PATH)
+    ).unwrap();
     let parsed_colors = parse_html_colors(&content);
 
     println!("cargo:rerun-if-changed={HTML_NAMES_PATH}");
@@ -57,7 +59,7 @@ fn parse_html_colors(content: &str) -> Vec<HtmlColorRaw> {
 fn separate_const_for_each_color(buff: &mut String, colors: &[HtmlColorRaw]) {
     for HtmlColorRaw { name, ctor } in colors {
         *buff += &format!(
-            "pub const {}: RGB = {};\n",
+            "pub const {}: Rgb = {};\n",
             name.to_ascii_uppercase(), ctor
         );
     }
