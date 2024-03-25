@@ -11,6 +11,7 @@ edition = "2021"
 categories = ["graphics", "algorithms"]
 repository = "https://github.com/woojiq/codi"
 keywords = ["color", "html", "closest-color", "perceptual-uniform"]
+license = "MIT"
 
 [workspace.lints.clippy]
 all = { level = "warn", priority = -2 }
@@ -21,8 +22,8 @@ complexity = { level = "warn", priority = -1 }
 perf = { level = "warn", priority = -1 }
 pedantic = { level = "warn", priority = -1 }
 nursery = { level = "warn", priority = -1 }
+cargo = { level = "warn", priority = -1 }
 
-cargo = { level = "allow", priority = -1 }
 must_use_candidate = "allow"
 suboptimal_flops = "allow"
 
@@ -30,6 +31,11 @@ suboptimal_flops = "allow"
 name = "codi-bin"
 version.workspace = true
 edition.workspace = true
+categories.workspace = true
+repository.workspace = true
+keywords.workspace = true
+license.workspace = true
+description.workspace = true
 
 [dependencies]
 codi = { path = "libcodi" }

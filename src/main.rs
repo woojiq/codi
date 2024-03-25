@@ -75,7 +75,7 @@ Args:
 Options:
     --help                  Prints help information
     --version               Prints version
-    --all-html              Prints and displays all html color names
+    --all-html              Displays all named html color
     "
     )
 }
