@@ -44,6 +44,7 @@
           doCheck = true;
           checkPhase = ''
             cargo clippy -- -D warnings
+            cargo fmt --check
             cargo test --workspace -- --include-ignored
           '';
         }

@@ -1,5 +1,5 @@
-use crate::color_space::{Rgb, rgb};
-use crate::color_dist::{ColorDistance};
+use crate::color_dist::ColorDistance;
+use crate::color_space::{rgb, Rgb};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct HtmlColor {
@@ -33,7 +33,7 @@ const _: () = assert!(ONLY_NAMES.len() == COLORS.len());
 /**
     Splits array of tuples into tuple of arrays.
 
-    Unfortunately, I couldn't write generic solution using function declaration:  
+    Unfortunately, I couldn't write generic solution using function declaration:
     `<I, J, const N: usize>(arr: [(I, J); N]) -> ([I; N], [J; N)])`
 
     I tried two different methods:
@@ -61,7 +61,8 @@ const fn __split_colors_arr<const N: usize>() -> ([&'static str; N], [Rgb; N]) {
 */
 #[allow(clippy::missing_panics_doc)]
 pub fn find_closest<T: ColorDistance + ?Sized>(alg: &T, target: Rgb) -> HtmlColor {
-    let idx = alg.find_closest(target, &ONLY_COLORS)
+    let idx = alg
+        .find_closest(target, &ONLY_COLORS)
         .expect("SAFETY: we have assert for const array ONLY_COLORS length");
     COLORS[idx]
 }

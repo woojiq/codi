@@ -31,18 +31,21 @@ fn main() {
 }
 
 pub fn run(orig_color: codi::color_space::Rgb) {
-    use codi::html_color::{HtmlColor, find_closest};
+    use codi::html_color::{find_closest, HtmlColor};
 
-    println!("Original color: {orig_color:X} {}", pretty_block(orig_color));
+    println!(
+        "Original color: {orig_color:X} {}",
+        pretty_block(orig_color)
+    );
 
     for algo in codi::color_dist::ALGORITHMS {
-        let HtmlColor {name, color} = find_closest(algo, orig_color);
+        let HtmlColor { name, color } = find_closest(algo, orig_color);
         println!("{algo}: {name} {color:X} {}", pretty_block(color));
     }
 }
 
 pub fn print_all_html_colors() {
-    use codi::html_color::{MAX_NAME_LEN, COLORS};
+    use codi::html_color::{COLORS, MAX_NAME_LEN};
 
     let max_len = MAX_NAME_LEN;
     for color in COLORS {
@@ -50,13 +53,16 @@ pub fn print_all_html_colors() {
     }
 }
 
-fn pretty_block(codi::color_space::Rgb {r, g, b}: codi::color_space::Rgb) -> colored::ColoredString {
+fn pretty_block(
+    codi::color_space::Rgb { r, g, b }: codi::color_space::Rgb,
+) -> colored::ColoredString {
     use colored::Colorize;
     " ".repeat(2).on_truecolor(r, g, b)
 }
 
 fn help_message() -> String {
-    format!("\
+    format!(
+        "\
 {VERSION}
 Find closest named html color.
 
@@ -70,5 +76,6 @@ Options:
     --help                  Prints help information
     --version               Prints version
     --all-html              Prints and displays all html color names
-    ")
+    "
+    )
 }

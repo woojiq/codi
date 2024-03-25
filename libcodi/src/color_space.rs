@@ -13,9 +13,11 @@ pub enum Error {
 impl core::fmt::Display for Error {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::result::Result<(), core::fmt::Error> {
         match self {
-            Self::HexColorWrongLen(_len) => write!(f,
+            Self::HexColorWrongLen(_len) => write!(
+                f,
                 "The length of hex string must be {} or {} if the first character is '#'",
-                HEX_COLOR_LEN, HEX_COLOR_LEN + 1
+                HEX_COLOR_LEN,
+                HEX_COLOR_LEN + 1
             ),
             Self::NotAsciiHexDigit(dig) => write!(f, "{dig} is not ascii hexadecimal digit"),
         }
@@ -47,7 +49,7 @@ impl Rgb {
             for g in 0..=u8::MAX {
                 for b in 0..=u8::MAX {
                     func(Self::new(r, g, b));
-                } 
+                }
             }
         }
     }
@@ -109,7 +111,7 @@ impl TryFrom<[u8; 6]> for Rgb {
 }
 
 impl core::fmt::Display for Rgb {
-    fn fmt(& self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         write!(f, "Rgb({}, {}, {})", self.r, self.g, self.b)
     }
 }
@@ -151,19 +153,18 @@ impl From<Rgb> for Xyz {
         let (r, g, b) = (
             f32::from(value.r) / 255.0,
             f32::from(value.g) / 255.0,
-            f32::from(value.b) / 255.0
+            f32::from(value.b) / 255.0,
         );
 
         let to_linear = |col: f32| {
-            if col <= 0.04045 { col / 12.92 }
-            else { ((col + 0.055) / 1.055).powf(2.4) }
+            if col <= 0.04045 {
+                col / 12.92
+            } else {
+                ((col + 0.055) / 1.055).powf(2.4)
+            }
         };
 
-        let lin_col: [[f32; 1]; 3] = [
-            [to_linear(r)],
-            [to_linear(g)],
-            [to_linear(b)],
-        ];
+        let lin_col: [[f32; 1]; 3] = [[to_linear(r)], [to_linear(g)], [to_linear(b)]];
         assert_eq!(lin_col.len(), COEF[0].len());
 
         let mut res: [[f32; 1]; 3] = [[0.0], [0.0], [0.0]];
@@ -207,11 +208,18 @@ impl From<Xyz> for Cielab {
         let DELTA_M2 = DELTA.powi(-2);
 
         let f = |t: f32| {
-            if t > DELTA_3 { t.cbrt() }
-            else { 1.0 / 3.0 * t * DELTA_M2 + 4.0 / 29.0 }
+            if t > DELTA_3 {
+                t.cbrt()
+            } else {
+                1.0 / 3.0 * t * DELTA_M2 + 4.0 / 29.0
+            }
         };
 
-        let (x, y, z) = (value.x.into_inner(), value.y.into_inner(), value.z.into_inner());
+        let (x, y, z) = (
+            value.x.into_inner(),
+            value.y.into_inner(),
+            value.z.into_inner(),
+        );
 
         let (L, a, b) = (
             116.0 * f(y / Yn) - 16.0,
@@ -278,14 +286,17 @@ mod test {
     }
 
     fn from_hex_assert_ok(input: &str, expected: Rgb) {
-        assert_eq!(Rgb::try_from(input.as_bytes()), Ok(expected), "input: {input}");
+        assert_eq!(
+            Rgb::try_from(input.as_bytes()),
+            Ok(expected),
+            "input: {input}"
+        );
     }
 
     #[test]
     fn test_rgb_from_hex_error() {
         let tests = [
-            "0000000", "#00000", "#00000g", "-000000",
-            "#123 45", "123456 "
+            "0000000", "#00000", "#00000g", "-000000", "#123 45", "123456 ",
         ];
         for test in tests {
             assert!(Rgb::try_from(test.as_bytes()).is_err(), "input: {test}");
