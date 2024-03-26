@@ -11,7 +11,8 @@ edition = "2021"
 categories = ["graphics", "algorithms"]
 repository = "https://github.com/woojiq/codi"
 keywords = ["color", "html", "closest-color", "perceptual-uniform"]
-license = "MIT"
+license-file = "LICENSE"
+readme = "README.md"
 
 [workspace.lints.clippy]
 all = { level = "warn", priority = -2 }
@@ -34,8 +35,9 @@ edition.workspace = true
 categories.workspace = true
 repository.workspace = true
 keywords.workspace = true
-license.workspace = true
+license-file.workspace = true
 description.workspace = true
+readme.workspace = true
 
 [dependencies]
 codi = { path = "libcodi" }

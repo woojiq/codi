@@ -50,6 +50,11 @@
         }
       );
 
+      apps.default = {
+        type = "app";
+        program = "${self.packages.${system}.default}/bin/codi";
+      };
+
       devShells = {
         default = pkgs.mkShell {
           packages = with pkgs;

@@ -5,8 +5,9 @@ edition.workspace = true
 categories.workspace = true
 repository.workspace = true
 keywords.workspace = true
-license.workspace = true
+license-file.workspace = true
 description.workspace = true
+readme.workspace = true
 build = "build/main.rs"
 
 [dependencies]
