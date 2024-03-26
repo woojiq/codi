@@ -1,0 +1,13 @@
+# https://github.com/helix-editor/helix/blob/master/.github/dependabot.yml
+
+version: 2
+updates:
+  - package-ecosystem: "cargo"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      rust:
+        update-types:
+          - "minor"
+          - "patch"
