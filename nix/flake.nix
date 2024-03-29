@@ -13,7 +13,11 @@
   }:
     flake-utils.lib.eachSystem ["x86_64-linux"] (system: let
       pkgs = nixpkgs.legacyPackages.${system}.extend (import rust-overlay);
-      rust = pkgs.rust-bin.fromRustupToolchainFile ../rust-toolchain.toml;
+      rust =
+        (pkgs.rust-bin.fromRustupToolchainFile ../rust-toolchain.toml)
+        .override {
+          targets = [];
+        };
 
       cargoToml = builtins.fromTOML (builtins.readFile ../Cargo.toml);
 
@@ -43,7 +47,7 @@
           ];
           doCheck = true;
           checkPhase = ''
-            cargo clippy -- -D warnings
+            cargo clippy --workspace --all-targets -- -D warnings
             cargo fmt --check
             cargo test --workspace -- --include-ignored
           '';
@@ -65,6 +69,7 @@
               cargo-tarpaulin
 
               hyprpicker
+              bashInteractive
             ]
             ++ nativeBuildInputs;
         };

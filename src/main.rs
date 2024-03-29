@@ -18,46 +18,60 @@ fn main() {
         return;
     }
     if args.all_html {
-        print_all_html_colors();
+        println!("{}", print_all_html_colors());
         return;
     }
 
     if let Some(color) = args.color {
-        run(color);
+        println!("{}", find_closest_all_algs(color));
     } else {
         eprintln!("{}", help_message());
         std::process::exit(1);
     }
 }
 
-pub fn run(orig_color: codi::color_space::Rgb) {
+pub fn find_closest_all_algs(orig_color: codi::color_space::Rgb) -> tabled::Table {
     use codi::html_color::{find_closest, HtmlColor};
+    use tabled::builder::Builder;
 
-    println!(
-        "Original color: {orig_color:X} {}",
-        pretty_block(orig_color)
-    );
+    let mut table = Builder::default();
+    table.push_record(["Algorithm", "HTML color", "Hex", ""]);
+    table.push_record([
+        "> Original color".into(),
+        "unknown".into(),
+        format!("{orig_color:X}"),
+        rgb_block(orig_color),
+    ]);
 
     for algo in codi::color_dist::ALGORITHMS {
         let HtmlColor { name, color } = find_closest(algo, orig_color);
-        println!("{algo}: {name} {color:X} {}", pretty_block(color));
+        table.push_record([
+            algo.to_string(),
+            name.into(),
+            format!("{color:X}"),
+            rgb_block(color),
+        ]);
     }
+    table.build()
 }
 
-pub fn print_all_html_colors() {
-    use codi::html_color::{COLORS, MAX_NAME_LEN};
+pub fn print_all_html_colors() -> tabled::Table {
+    use tabled::builder::Builder;
 
-    let max_len = MAX_NAME_LEN;
-    for color in COLORS {
-        println!("{:<0max_len$} {}", color.name, pretty_block(color.color));
+    let mut table = Builder::default();
+    for color in codi::html_color::COLORS {
+        table.push_record([color.name, &rgb_block(color.color)]);
     }
+    table.build()
 }
 
-fn pretty_block(
-    codi::color_space::Rgb { r, g, b }: codi::color_space::Rgb,
-) -> colored::ColoredString {
-    use colored::Colorize;
-    " ".repeat(2).on_truecolor(r, g, b)
+fn rgb_block(codi::color_space::Rgb { r, g, b }: codi::color_space::Rgb) -> String {
+    use std::io::IsTerminal;
+    if std::io::stdout().is_terminal() {
+        format!("\x1b[48;2;{r};{g};{b}m  \x1b[0m")
+    } else {
+        String::from("  ")
+    }
 }
 
 fn help_message() -> String {

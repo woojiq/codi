@@ -150,12 +150,6 @@ impl From<Rgb> for Xyz {
             [0.0193, 0.1192, 0.9505],
         ];
 
-        let (r, g, b) = (
-            f32::from(value.r) / 255.0,
-            f32::from(value.g) / 255.0,
-            f32::from(value.b) / 255.0,
-        );
-
         let to_linear = |col: f32| {
             if col <= 0.04045 {
                 col / 12.92
@@ -164,20 +158,14 @@ impl From<Rgb> for Xyz {
             }
         };
 
+        let (r, g, b) = (
+            f32::from(value.r) / 255.0,
+            f32::from(value.g) / 255.0,
+            f32::from(value.b) / 255.0,
+        );
+
         let lin_col: [[f32; 1]; 3] = [[to_linear(r)], [to_linear(g)], [to_linear(b)]];
-        assert_eq!(lin_col.len(), COEF[0].len());
-
-        let mut res: [[f32; 1]; 3] = [[0.0], [0.0], [0.0]];
-
-        // TODO: separate function for matrix multiplication
-        #[allow(clippy::needless_range_loop)]
-        for i in 0..COEF.len() {
-            for j in 0..lin_col[0].len() {
-                for k in 0..COEF[0].len() {
-                    res[i][j] += COEF[i][k] * lin_col[k][j];
-                }
-            }
-        }
+        let res = crate::math_utils::matrix_mul(&COEF, &lin_col);
 
         Self {
             x: NotNan::new(res[0][0] * 100.0).unwrap(),

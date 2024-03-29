@@ -59,8 +59,8 @@ cargo build
 If you have the nix package manager, you can run Github CI locally: `nix flake check ./nix`.
 
 ## TODO
-- [ ] Tabled output
 - [ ] [API guidelines](https://rust-lang.github.io/api-guidelines/about.html)
 - [ ] Tests
 - [ ] Analyze produced assembly and try to optimize something (for learning purposes)
 - [ ] No-std support: not easy because no_std doesn't have common float operations
+- [ ] Xyz -> Rgb, Lab -> Xyz conversions + fuzzy testing
