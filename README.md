@@ -49,6 +49,8 @@ $ hyprpicker | xargs codi   # run picker that returns hex color
 $ codi --all-html           # print all named html colors
 ```
 
+Keep in mind that your terminal must support true colors to get exact color output, otherwise you will have inaccurate color representation in the terminal. For example, instead of skyblue you will see blue.
+
 ## Developing
 
 ```bash
@@ -58,9 +60,13 @@ cargo build
 
 If you have the nix package manager, you can run Github CI locally: `nix flake check ./nix`.
 
+### Structure
+* _codi-core_: library with different color spaces (rgb, xyz) and distance algorithms (euclidean, cie94).
+* _codi-bin_: binary that uses library (obviously) to calculate interesting things.
+* _tests_: integration tests.
+
 ## TODO
 - [ ] [API guidelines](https://rust-lang.github.io/api-guidelines/about.html)
-- [ ] Tests
 - [ ] Analyze produced assembly and try to optimize something (for learning purposes)
 - [ ] No-std support: not easy because no_std doesn't have common float operations
 - [ ] Xyz -> Rgb, Lab -> Xyz conversions + fuzzy testing

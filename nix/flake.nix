@@ -12,6 +12,7 @@
     flake-utils,
   }:
     flake-utils.lib.eachSystem ["x86_64-linux"] (system: let
+      pname = "codi";
       pkgs = nixpkgs.legacyPackages.${system}.extend (import rust-overlay);
       rust =
         (pkgs.rust-bin.fromRustupToolchainFile ../rust-toolchain.toml)
@@ -31,9 +32,8 @@
       ];
     in {
       packages.default = rustPlatform.buildRustPackage {
-        inherit nativeBuildInputs;
+        inherit nativeBuildInputs pname;
 
-        pname = cargoToml.package.name;
         version = cargoToml.workspace.package.version;
         src = ./..;
         cargoLock.lockFile = ../Cargo.lock;
@@ -45,18 +45,18 @@
           nativeCheckInputs = [
             rust
           ];
+          # https://github.com/NixOS/nixpkgs/blob/master/pkgs/build-support/rust/hooks/cargo-check-hook.sh
           doCheck = true;
-          checkPhase = ''
+          postCheck = ''
             cargo clippy --workspace --all-targets -- -D warnings
             cargo fmt --check
-            cargo test --workspace -- --include-ignored
           '';
         }
       );
 
       apps.default = {
         type = "app";
-        program = "${self.packages.${system}.default}/bin/codi";
+        program = "${self.packages.${system}.default}/bin/${pname}";
       };
 
       devShells = {

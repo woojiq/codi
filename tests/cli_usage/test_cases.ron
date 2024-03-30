@@ -1,0 +1,24 @@
+[
+CliUsageTestCase(
+    args: ["#FF55FF"],
+    stdout: 
+r##"+--------------------+------------+---------+----+
+| Algorithm          | HTML color | Hex     |    |
++--------------------+------------+---------+----+
+| > Original color   | unknown    | #FF55FF |    |
++--------------------+------------+---------+----+
+| Euclidean          | violet     | #EE82EE |    |
++--------------------+------------+---------+----+
+| Euclidean Improved | violet     | #EE82EE |    |
++--------------------+------------+---------+----+
+| CIE94              | magenta    | #FF00FF |    |
++--------------------+------------+---------+----+
+"##
+),
+CliUsageTestCase(
+    args: ["123"],
+    stderr: 
+r##"codi: cannot parse argument "123": The length of hex string must be 6 or 7 if the first character is '#'
+"##
+),
+]

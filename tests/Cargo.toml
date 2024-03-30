@@ -1,0 +1,20 @@
+[package]
+name = "tests"
+version.workspace = true
+edition.workspace = true
+license-file.workspace = true
+publish = false
+
+[lints]
+workspace = true
+
+[dev-dependencies]
+assert_cmd = "2.0.14"
+
+[build-dependencies]
+ron = "0.8.1"
+serde = { version = "1.0.197", features = ["derive"] }
+
+[[test]]
+name = "cli_usage"
+path = "cli_usage/test_cases.ron.rs"

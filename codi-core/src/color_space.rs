@@ -74,7 +74,7 @@ impl TryFrom<&str> for Rgb {
         # Example
 
         ```
-        use codi::color_space::Rgb;
+        use codi_core::color_space::Rgb;
         assert_eq!("#00a0f0".try_into(), Ok(Rgb::new(0, 160, 240)));
         assert_eq!("fFfFfF".try_into(), Ok(Rgb::new(255, 255, 255)));
         ```

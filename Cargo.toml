@@ -1,6 +1,9 @@
 [workspace]
 members = [
-  "libcodi",
+  "codi-core",
+  "codi-bin",
+
+  "tests",
 ]
 resolver = "2"
 
@@ -27,23 +30,3 @@ cargo = { level = "warn", priority = -1 }
 
 must_use_candidate = "allow"
 suboptimal_flops = "allow"
-
-[package]
-name = "codi-bin"
-version.workspace = true
-edition.workspace = true
-categories.workspace = true
-repository.workspace = true
-keywords.workspace = true
-license-file.workspace = true
-description.workspace = true
-readme.workspace = true
-
-[dependencies]
-codi = { path = "libcodi" }
-lexopt = "0.3.0"
-tabled = { version = "0.15.0", default-features = false, features = ["std", "ansi"] }
-
-[[bin]]
-name = "codi"
-path = "src/main.rs"

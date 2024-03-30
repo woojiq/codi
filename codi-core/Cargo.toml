@@ -1,5 +1,5 @@
 [package]
-name = "codi"
+name = "codi-core"
 version.workspace = true
 edition.workspace = true
 categories.workspace = true
@@ -8,7 +8,6 @@ keywords.workspace = true
 license-file.workspace = true
 description.workspace = true
 readme.workspace = true
-build = "build/main.rs"
 
 [dependencies]
 ordered-float = { version = "4.2.0" }

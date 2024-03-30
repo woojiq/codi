@@ -1,6 +1,6 @@
 #[derive(Default)]
 pub struct Args {
-    pub color: Option<codi::color_space::Rgb>,
+    pub color: Option<codi_core::color_space::Rgb>,
     pub help: bool,
     pub version: bool,
     pub all_html: bool,

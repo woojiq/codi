@@ -1,7 +1,7 @@
 mod args;
 
-const PKG_NAME: &str = env!("CARGO_PKG_NAME");
-const VERSION: &str = concat!(env!("CARGO_PKG_NAME"), " v", env!("CARGO_PKG_VERSION"));
+const PKG_NAME: &str = env!("CARGO_BIN_NAME");
+const VERSION: &str = concat!(env!("CARGO_BIN_NAME"), " v", env!("CARGO_PKG_VERSION"));
 
 fn main() {
     let args = args::parse_cli_args().unwrap_or_else(|err| {
@@ -30,8 +30,8 @@ fn main() {
     }
 }
 
-pub fn find_closest_all_algs(orig_color: codi::color_space::Rgb) -> tabled::Table {
-    use codi::html_color::{find_closest, HtmlColor};
+pub fn find_closest_all_algs(orig_color: codi_core::color_space::Rgb) -> tabled::Table {
+    use codi_core::html_color::{find_closest, HtmlColor};
     use tabled::builder::Builder;
 
     let mut table = Builder::default();
@@ -43,7 +43,7 @@ pub fn find_closest_all_algs(orig_color: codi::color_space::Rgb) -> tabled::Tabl
         rgb_block(orig_color),
     ]);
 
-    for algo in codi::color_dist::ALGORITHMS {
+    for algo in codi_core::color_dist::ALGORITHMS {
         let HtmlColor { name, color } = find_closest(algo, orig_color);
         table.push_record([
             algo.to_string(),
@@ -59,13 +59,13 @@ pub fn print_all_html_colors() -> tabled::Table {
     use tabled::builder::Builder;
 
     let mut table = Builder::default();
-    for color in codi::html_color::COLORS {
+    for color in codi_core::html_color::COLORS {
         table.push_record([color.name, &rgb_block(color.color)]);
     }
     table.build()
 }
 
-fn rgb_block(codi::color_space::Rgb { r, g, b }: codi::color_space::Rgb) -> String {
+fn rgb_block(codi_core::color_space::Rgb { r, g, b }: codi_core::color_space::Rgb) -> String {
     use std::io::IsTerminal;
     if std::io::stdout().is_terminal() {
         format!("\x1b[48;2;{r};{g};{b}m  \x1b[0m")
