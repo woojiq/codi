@@ -2,7 +2,6 @@
 members = [
   "codi-core",
   "codi-bin",
-
   "tests",
 ]
 resolver = "2"

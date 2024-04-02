@@ -63,10 +63,13 @@ If you have the nix package manager, you can run Github CI locally: `nix flake c
 ### Structure
 * _codi-core_: library with different color spaces (rgb, xyz) and distance algorithms (euclidean, cie94).
 * _codi-bin_: binary that uses library (obviously) to calculate interesting things.
-* _tests_: integration tests.
+* _tests_: integration tests. Run with `cargo build -p codi-bin && cargo test -p tests`.
 
 ## TODO
+- [ ] Optimizing library
+    - [ ] Run profilling tool
+    - [ ] Analyze produced assembly (for learning purposes)
 - [ ] [API guidelines](https://rust-lang.github.io/api-guidelines/about.html)
-- [ ] Analyze produced assembly and try to optimize something (for learning purposes)
 - [ ] No-std support: not easy because no_std doesn't have common float operations
-- [ ] Xyz -> Rgb, Lab -> Xyz conversions + fuzzy testing
+- [ ] Xyz -> Rgb, Lab -> Xyz conversions
+- [ ] Fuzzy testing

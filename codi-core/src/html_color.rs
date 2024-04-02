@@ -13,17 +13,6 @@ include!(concat!(env!("OUT_DIR"), "/contrib/html-color-names.txt.rs"));
 
 pub const ONLY_NAMES: [&str; COLORS.len()] = __split_colors_arr().0;
 pub const ONLY_COLORS: [Rgb; COLORS.len()] = __split_colors_arr().1;
-pub const MAX_NAME_LEN: usize = {
-    let mut len = 0;
-    let mut idx = 0;
-    while idx < COLORS.len() {
-        if len < COLORS[idx].name.len() {
-            len = COLORS[idx].name.len();
-        }
-        idx += 1;
-    }
-    len
-};
 
 // Modify it when adding new entries to the file.
 const _: () = assert!(COLORS.len() == 138);
@@ -65,4 +54,13 @@ pub fn find_closest<T: ColorDistance + ?Sized>(alg: &T, target: Rgb) -> HtmlColo
         .find_closest(target, &ONLY_COLORS)
         .expect("SAFETY: we have assert for const array ONLY_COLORS length");
     COLORS[idx]
+}
+
+pub fn find_exact(target: Rgb) -> Option<&'static str> {
+    for HtmlColor { name, color } in COLORS {
+        if target == color {
+            return Some(name);
+        }
+    }
+    None
 }

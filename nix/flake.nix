@@ -45,11 +45,13 @@
           nativeCheckInputs = [
             rust
           ];
+          # Tests are performed in checkPhase:
           # https://github.com/NixOS/nixpkgs/blob/master/pkgs/build-support/rust/hooks/cargo-check-hook.sh
           doCheck = true;
           postCheck = ''
             cargo clippy --workspace --all-targets -- -D warnings
             cargo fmt --check
+            RUSTDOCFLAGS='-D warnings' cargo doc --workspace
           '';
         }
       );

@@ -255,7 +255,7 @@ mod test {
     // Check with and without "#" prefix, lowercase and uppercase. The behavior
     // should be the same.
     #[test]
-    fn test_rgb_from_hex_some() {
+    fn rgb_from_hex_some() {
         let tests = [
             ("#000000", rgb(0, 0, 0)),
             ("#FFfFff", rgb(255, 255, 255)),
@@ -282,7 +282,7 @@ mod test {
     }
 
     #[test]
-    fn test_rgb_from_hex_error() {
+    fn rgb_from_hex_error() {
         let tests = [
             "0000000", "#00000", "#00000g", "-000000", "#123 45", "123456 ",
         ];
@@ -292,7 +292,7 @@ mod test {
     }
 
     #[test]
-    fn test_hex_byte_to_dec_ok() {
+    fn hex_byte_to_dec_ok() {
         assert_eq!(hex_byte_to_dec(b'0'), Ok(0));
         assert_eq!(hex_byte_to_dec(b'1'), Ok(1));
         assert_eq!(hex_byte_to_dec(b'9'), Ok(9));
@@ -303,7 +303,7 @@ mod test {
     }
 
     #[test]
-    fn test_hex_byte_to_dec_error() {
+    fn hex_byte_to_dec_error() {
         assert!(hex_byte_to_dec(0).is_err());
         assert!(hex_byte_to_dec(9).is_err());
         assert!(hex_byte_to_dec(b'0' - 1).is_err());
@@ -314,7 +314,7 @@ mod test {
     }
 
     #[test]
-    fn test_u8_from_two_hex_ok() {
+    fn u8_from_two_hex_ok() {
         assert_eq!(u8_from_two_hex(b'0', b'0'), Ok(0));
         assert_eq!(u8_from_two_hex(b'0', b'1'), Ok(1));
         assert_eq!(u8_from_two_hex(b'1', b'0'), Ok(16));
@@ -325,7 +325,7 @@ mod test {
 
     #[test]
     #[ignore]
-    fn test_lab_from_rgb_not_panic() {
+    fn lab_from_rgb_not_panic() {
         Rgb::for_each(|color: Rgb| {
             let _ = Cielab::from(color);
         });

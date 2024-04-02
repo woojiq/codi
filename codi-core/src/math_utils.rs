@@ -27,7 +27,7 @@ mod test {
     use super::*;
 
     #[test]
-    fn test_matrix_mul_zero_size_dimension() {
+    fn matrix_mul_zero_size_dimension() {
         let empty = [[0u32; 0]; 0];
         assert_eq!(matrix_mul(&empty, &empty), empty);
 
@@ -36,7 +36,7 @@ mod test {
     }
 
     #[test]
-    fn test_matrix_mul_same_squares() {
+    fn matrix_mul_same_squares() {
         let matrix = [[1u32, 2, 3], [4, 5, 6], [7, 8, 9]];
         let answer = [[30, 36, 42], [66, 81, 96], [102, 126, 150]];
         assert_eq!(matrix_mul(&matrix, &matrix), answer);

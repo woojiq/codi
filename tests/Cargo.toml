@@ -10,11 +10,14 @@ workspace = true
 
 [dev-dependencies]
 assert_cmd = "2.0.14"
+predicates = "3.1.0"
 
-[build-dependencies]
-ron = "0.8.1"
-serde = { version = "1.0.197", features = ["derive"] }
+# Unfortunately, I haven't found a way to recompile the binary before running
+# the tests (at least on the stable toolchain).
+# https://doc.rust-lang.org/cargo/reference/unstable.html?highlight=artifacts#artifact-dependencies
+# So you need to build the binary manually before running integration tests:
+#     cargo build -p codi-bin && cargo test -p tests
 
 [[test]]
-name = "cli_usage"
-path = "cli_usage/test_cases.ron.rs"
+name = "integration"
+path = "integration/main.rs"
