@@ -10,7 +10,12 @@ description.workspace = true
 readme.workspace = true
 
 [dependencies]
-ordered-float = { version = "4.2.0" }
+libm = "0.2.8"
+ordered-float = { version = "4.2.0", default-features = false }
+
+[features]
+default = ["std"]
+std = []
 
 [lints]
 workspace = true

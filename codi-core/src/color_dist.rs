@@ -1,3 +1,4 @@
+use libm::{hypotf, powf, sqrtf};
 use ordered_float::NotNan;
 
 use crate::color_space::{Cielab, Rgb};
@@ -30,9 +31,9 @@ pub struct Euclidean;
 
 impl ColorDistance for Euclidean {
     fn dist(&self, c1: Rgb, c2: Rgb) -> NotNan<f32> {
-        let dist = (f32::from(c1.r) - f32::from(c2.r)).powi(2)
-            + (f32::from(c1.g) - f32::from(c2.g)).powi(2)
-            + (f32::from(c1.b) - f32::from(c2.b)).powi(2);
+        let dist = powf(f32::from(c1.r) - f32::from(c2.r), 2.0)
+            + powf(f32::from(c1.g) - f32::from(c2.g), 2.0)
+            + powf(f32::from(c1.b) - f32::from(c2.b), 2.0);
         NotNan::new(dist).unwrap()
     }
 }
@@ -55,9 +56,9 @@ impl ColorDistance for EuclideanImproved {
             (f32::from(c1.g) - f32::from(c2.g)),
             (f32::from(c1.b) - f32::from(c2.b)),
         );
-        let dist: f32 = (2.0 + red_mean / 256.0) * d_r.powi(2)
-            + 4.0 * d_g.powi(2)
-            + (2.0 + (255.0 - red_mean) / 256.0) * d_b.powi(2);
+        let dist: f32 = powf((2.0 + red_mean / 256.0) * d_r, 2.0)
+            + 4.0 * powf(d_g, 2.0)
+            + powf((2.0 + (255.0 - red_mean) / 256.0) * d_b, 2.0);
         NotNan::new(dist).unwrap()
     }
 }
@@ -81,20 +82,19 @@ impl ColorDistance for CIE94 {
 
         let (delta_l, delta_a, delta_b) = (lab1.l - lab2.l, lab1.a - lab2.a, lab1.b - lab2.b);
 
-        let C1 = lab1.a.hypot(lab1.b.into_inner());
-        let C2 = lab2.a.hypot(lab2.b.into_inner());
+        let C1 = hypotf(*lab1.a, *lab1.b);
+        let C2 = hypotf(*lab2.a, *lab2.b);
 
         let Cab = C1 - C2;
         let Sl = 1.0;
         let Sc = 1.0 + K1 * C1;
         let Sh = 1.0 + K2 * C1;
         // https://github.com/zschuessler/DeltaE/issues/9
-        let Hab = (delta_a.powi(2) + delta_b.powi(2) - Cab.powi(2))
-            .max(0.0)
-            .sqrt();
+        let Hab = sqrtf((powf(*delta_a, 2.0) + powf(*delta_b, 2.0) - powf(Cab, 2.0)).max(0.0));
 
-        let dist =
-            (delta_l / (kL * Sl)).powi(2) + (Cab / (kC * Sc)).powi(2) + (Hab / (kH * Sh)).powi(2);
+        let dist = powf(*delta_l / (kL * Sl), 2.0)
+            + powf(Cab / (kC * Sc), 2.0)
+            + powf(Hab / (kH * Sh), 2.0);
         NotNan::new(dist).unwrap()
     }
 }

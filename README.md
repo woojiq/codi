@@ -64,6 +64,3 @@ $ nix develop ./nix # devShell
 $ direnv allow # direnv with devShell
 $ nix flake check ./nix # run CI locally
 ```
-
-## TODO
-- [ ] No-std support: not easy because no_std doesn't have common float operations (thumbv6m-none-eabi target)

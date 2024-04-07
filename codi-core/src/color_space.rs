@@ -1,3 +1,4 @@
+use libm::{cbrtf, powf, roundf};
 use ordered_float::NotNan;
 
 const HEX_COLOR_LEN: usize = 6;
@@ -33,6 +34,7 @@ impl core::fmt::Display for Error {
     }
 }
 
+#[cfg(feature = "std")]
 impl std::error::Error for Error {}
 
 type Result<T> = core::result::Result<T, Error>;
@@ -134,7 +136,7 @@ impl From<Xyz> for Rgb {
             if col <= 0.003_130_8 {
                 col * 12.92
             } else {
-                col.powf(1.0 / 2.4) * 1.055 - 0.055
+                powf(col, 1.0 / 2.4) * 1.055 - 0.055
             }
         };
 
@@ -147,9 +149,9 @@ impl From<Xyz> for Rgb {
         );
 
         Self {
-            r: (corrected.0).round() as u8,
-            g: (corrected.1).round() as u8,
-            b: (corrected.2).round() as u8,
+            r: roundf(corrected.0) as u8,
+            g: roundf(corrected.1) as u8,
+            b: roundf(corrected.2) as u8,
         }
     }
 }
@@ -203,7 +205,7 @@ impl From<Rgb> for Xyz {
             if col <= 0.04045 {
                 col / 12.92
             } else {
-                ((col + 0.055) / 1.055).powf(2.4)
+                powf((col + 0.055) / 1.055, 2.4)
             }
         };
 
@@ -231,7 +233,7 @@ impl From<Cielab> for Xyz {
     fn from(value: Cielab) -> Self {
         let f_inv = |t: f32| {
             if t > LAB_XYZ_DELTA {
-                t.powi(3)
+                powf(t, 3.0)
             } else {
                 3.0 * LAB_XYZ_DELTA_POW2 * (t - 4.0 / 29.0)
             }
@@ -265,9 +267,9 @@ impl From<Xyz> for Cielab {
     fn from(value: Xyz) -> Self {
         let f = |t: f32| {
             if t > LAB_XYZ_DELTA_POW3 {
-                t.cbrt()
+                cbrtf(t)
             } else {
-                1.0 / 3.0 * t * LAB_XYZ_DELTA.powi(-2) + 4.0 / 29.0
+                1.0 / 3.0 * t * powf(LAB_XYZ_DELTA, -2.0) + 4.0 / 29.0
             }
         };
 

@@ -6,7 +6,7 @@ pub fn matrix_mul<T, const I: usize, const J: usize, const K: usize>(
     m2: &[[T; J]; K],
 ) -> [[T; J]; I]
 where
-    T: std::ops::Mul<Output = T> + std::ops::Add<Output = T> + Default + Copy,
+    T: core::ops::Mul<Output = T> + core::ops::Add<Output = T> + Default + Copy,
 {
     let mut res: [[T; J]; I] = [[T::default(); J]; I];
 

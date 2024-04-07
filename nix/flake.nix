@@ -17,7 +17,7 @@
       rust =
         (pkgs.rust-bin.fromRustupToolchainFile ../rust-toolchain.toml)
         .override {
-          targets = [];
+          targets = ["thumbv6m-none-eabi"];
           extensions = [];
         };
       rust-nightly = pkgs.rust-bin.nightly."2024-02-01".default;
@@ -66,6 +66,8 @@
           doCheck = true;
 
           postCheck = ''
+            cargo build -p codi-core --target thumbv6m-none-eabi --no-default-features
+
             cargo clippy --all-targets
             cargo fmt --check
             cargo doc
