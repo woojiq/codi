@@ -18,7 +18,16 @@
         (pkgs.rust-bin.fromRustupToolchainFile ../rust-toolchain.toml)
         .override {
           targets = [];
+          extensions = [];
         };
+      rust-nightly = pkgs.rust-bin.nightly."2024-02-01".default;
+
+      cargoNightlyUtil = name:
+        pkgs.writeShellScriptBin name ''
+          export RUSTC="${rust-nightly}/bin/rustc";
+          export CARGO="${rust-nightly}/bin/cargo";
+          exec "${pkgs.${name}}/bin/${name}" "$@"
+        '';
 
       cargoToml = builtins.fromTOML (builtins.readFile ../Cargo.toml);
 
@@ -29,7 +38,10 @@
 
       nativeBuildInputs = [
         rust
+        pkgs.mold
       ];
+
+      useMoldLinker = "-C link-arg=-fuse-ld=mold";
     in {
       packages.default = rustPlatform.buildRustPackage {
         inherit nativeBuildInputs pname;
@@ -38,20 +50,27 @@
         src = ./..;
         cargoLock.lockFile = ../Cargo.lock;
         doCheck = false;
+
+        RUSTFLAGS = "${useMoldLinker} -D warnings";
+        RUSTDOCFLAGS = "-D warnings";
       };
 
       checks.default = self.packages.${system}.default.overrideAttrs (
         finalAttrs: previousAttrs: {
           nativeCheckInputs = [
             rust
+            (cargoNightlyUtil "cargo-udeps")
           ];
           # Tests are performed in checkPhase:
           # https://github.com/NixOS/nixpkgs/blob/master/pkgs/build-support/rust/hooks/cargo-check-hook.sh
           doCheck = true;
+
           postCheck = ''
-            cargo clippy --workspace --all-targets -- -D warnings
+            cargo clippy --all-targets
             cargo fmt --check
-            RUSTDOCFLAGS='-D warnings' cargo doc --workspace
+            cargo doc
+
+            cargo udeps --all-targets
           '';
         }
       );
@@ -67,17 +86,17 @@
             [
               rust-analyzer
               gdb
-              cargo-mutants
-              cargo-tarpaulin
 
-              hyprpicker
               bashInteractive
             ]
             ++ nativeBuildInputs;
+          shellHook = ''
+            export RUSTFLAGS="${useMoldLinker}";
+          '';
         };
         nightly = pkgs.mkShell {
-          packages = with pkgs; [
-            rust-bin.nightly."2024-02-01".default
+          packages = [
+            rust-nightly
           ];
         };
       };

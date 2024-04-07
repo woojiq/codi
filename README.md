@@ -54,22 +54,16 @@ Keep in mind that your terminal must support true colors to get exact color outp
 ## Developing
 
 ```bash
-git clone https://github.com/woojiq/codi
-cargo build
+$ git clone https://github.com/woojiq/codi
+
+# Build the project
+$ cargo build
+
+# If you have nix package manager
+$ nix develop ./nix # devShell
+$ direnv allow # direnv with devShell
+$ nix flake check ./nix # run CI locally
 ```
 
-If you have the nix package manager, you can run Github CI locally: `nix flake check ./nix`.
-
-### Structure
-* _codi-core_: library with different color spaces (rgb, xyz) and distance algorithms (euclidean, cie94).
-* _codi-bin_: binary that uses library (obviously) to calculate interesting things.
-* _tests_: integration tests. Run with `cargo build -p codi-bin && cargo test -p tests`.
-
 ## TODO
-- [ ] Optimizing library
-    - [ ] Run profilling tool
-    - [ ] Analyze produced assembly (for learning purposes)
-- [ ] [API guidelines](https://rust-lang.github.io/api-guidelines/about.html)
-- [ ] No-std support: not easy because no_std doesn't have common float operations
-- [ ] Xyz -> Rgb, Lab -> Xyz conversions
-- [ ] Fuzzy testing
+- [ ] No-std support: not easy because no_std doesn't have common float operations (thumbv6m-none-eabi target)

@@ -108,21 +108,22 @@ impl core::fmt::Display for CIE94 {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::color_space::rgb;
-
-    // #564C55 - Euclidean/Improved not OK
-    // #2C1218
+    use crate::color_space::Rgb;
+    use crate::html_color::find_closest;
 
     #[test]
-    fn test_basic() {
-        assert_eq!(
-            CIE94.find_closest(rgb(86, 76, 85), &[rgb(47, 79, 79), rgb(105, 105, 105)]),
-            Some(1)
-        );
-    }
+    fn all_algs_same_result() -> Result<(), Box<dyn std::error::Error>> {
+        let tests = [(Rgb::try_from("#81818d")?, Rgb::try_from("#808080")?)];
 
-    #[test]
-    fn test_cie_94_not_panic() {
-        CIE94.dist(rgb(0, 0, 0), rgb(0, 0, 1));
+        for (input, expected) in tests {
+            for alg in ALGORITHMS {
+                assert_eq!(
+                    find_closest(alg, input).color,
+                    expected,
+                    "closest html color for {input} shoud be {expected}"
+                );
+            }
+        }
+        Ok(())
     }
 }
