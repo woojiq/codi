@@ -18,8 +18,8 @@ lexopt = "0.3.0"
 tabled = { version = "0.15.0", default-features = false, features = ["std", "ansi"] }
 
 [dev-dependencies]
-assert_cmd = "2.0.14"
-predicates = "3.1.0"
+assert_cmd = "2.0.15"
+predicates = "3.1.2"
 
 [[bin]]
 name = "codi"
