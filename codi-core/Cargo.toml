@@ -11,7 +11,7 @@ readme.workspace = true
 
 [dependencies]
 libm = "0.2.8"
-ordered-float = { version = "4.3.0", default-features = false }
+ordered-float = { version = "4.4.0", default-features = false }
 
 [features]
 default = ["std"]
