@@ -15,7 +15,7 @@ workspace = true
 [dependencies]
 codi-core = { path = "../codi-core" }
 lexopt = "0.3.0"
-tabled = { version = "0.17.0", default-features = false, features = ["std", "ansi"] }
+tabled = { version = "0.18.0", default-features = false, features = ["std", "ansi"] }
 
 [dev-dependencies]
 assert_cmd = "2.0.16"
