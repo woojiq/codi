@@ -10,7 +10,7 @@ description.workspace = true
 readme.workspace = true
 
 [dependencies]
-libm = "0.2.11"
+libm = "0.2.13"
 ordered-float = { version = "5.0.0", default-features = false }
 
 [features]
