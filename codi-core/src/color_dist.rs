@@ -50,7 +50,7 @@ pub struct EuclideanImproved;
 
 impl ColorDistance for EuclideanImproved {
     fn dist(&self, c1: Rgb, c2: Rgb) -> NotNan<f32> {
-        let red_mean = (f32::from(c1.r) + f32::from(c2.r)) / 2.0;
+        let red_mean = f32::midpoint(f32::from(c1.r), f32::from(c2.r));
         let (d_r, d_g, d_b) = (
             (f32::from(c1.r) - f32::from(c2.r)),
             (f32::from(c1.g) - f32::from(c2.g)),

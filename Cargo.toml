@@ -6,9 +6,9 @@ members = [
 resolver = "2"
 
 [workspace.package]
-version = "0.1.0"
+version = "0.2.0"
 description = "Color perception difference algorithms and utilities."
-edition = "2021"
+edition = "2024"
 categories = ["graphics", "algorithms"]
 repository = "https://github.com/woojiq/codi"
 keywords = ["color", "html", "closest-color", "perceptual-uniform"]

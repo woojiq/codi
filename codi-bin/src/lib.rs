@@ -11,7 +11,7 @@ pub fn find_closest_all_algs<T: std::io::Write>(
     writer: &mut T,
     orig_color: codi_core::color_space::Rgb,
 ) -> std::io::Result<()> {
-    use codi_core::html_color::{find_closest, find_exact, HtmlColor};
+    use codi_core::html_color::{HtmlColor, find_closest, find_exact};
     use tabled::builder::Builder;
 
     let mut table = Builder::default();

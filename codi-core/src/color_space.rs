@@ -392,7 +392,7 @@ mod test {
     }
 
     #[test]
-    #[ignore]
+    #[ignore = "slow test"]
     fn rgb_to_xyz_to_rgb() {
         Rgb::for_each(|color: Rgb| {
             assert_eq!(color, Rgb::from(Xyz::from(color)), "input: {color}");
@@ -400,7 +400,7 @@ mod test {
     }
 
     #[test]
-    #[ignore]
+    #[ignore = "slow test"]
     fn rgb_to_lab_to_rgb() {
         Rgb::for_each(|color: Rgb| {
             assert_eq!(color, Rgb::from(Cielab::from(color)), "input: {color}");

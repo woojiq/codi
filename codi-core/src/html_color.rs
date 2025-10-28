@@ -1,5 +1,5 @@
 use crate::color_dist::ColorDistance;
-use crate::color_space::{rgb, Rgb};
+use crate::color_space::{Rgb, rgb};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct HtmlColor {

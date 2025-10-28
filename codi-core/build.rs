@@ -1,3 +1,5 @@
+use std::fmt::Write as _;
+
 fn main() {
     generate_html_colors();
 }
@@ -41,7 +43,7 @@ pub fn generate_html_colors() {
     std::fs::write(gen_path, gen_code).unwrap();
 }
 
-fn parse_html_colors(content: &str) -> Vec<HtmlColorRaw> {
+fn parse_html_colors(content: &'_ str) -> Vec<HtmlColorRaw<'_>> {
     let mut colors = vec![];
 
     for line in content.lines() {
@@ -61,14 +63,19 @@ fn parse_html_colors(content: &str) -> Vec<HtmlColorRaw> {
 
 fn separate_const_for_each_color(buff: &mut String, colors: &[HtmlColorRaw]) {
     for HtmlColorRaw { name, ctor } in colors {
-        *buff += &format!("pub const {}: Rgb = {};\n", name.to_ascii_uppercase(), ctor);
+        let _ = writeln!(
+            buff,
+            "pub const {}: Rgb = {};",
+            name.to_ascii_uppercase(),
+            ctor
+        );
     }
 }
 
 fn array_with_all_colors(buff: &mut String, colors: &[HtmlColorRaw]) {
-    *buff += &format!("pub const COLORS: [HtmlColor; {}] = [\n", colors.len());
+    let _ = writeln!(buff, "pub const COLORS: [HtmlColor; {}] = [", colors.len());
     for HtmlColorRaw { name, ctor } in colors {
-        *buff += &format!("\tHtmlColor {{name: \"{name}\", color: {ctor}}},\n");
+        let _ = writeln!(buff, "\tHtmlColor {{name: \"{name}\", color: {ctor}}},");
     }
     *buff += "];\n";
 }

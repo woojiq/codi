@@ -14,13 +14,12 @@
     flake-utils.lib.eachSystem ["x86_64-linux"] (system: let
       pname = "codi";
       pkgs = nixpkgs.legacyPackages.${system}.extend (import rust-overlay);
-      rust =
-        (pkgs.rust-bin.fromRustupToolchainFile ../rust-toolchain.toml)
+      rust = (pkgs.rust-bin.fromRustupToolchainFile ../rust-toolchain.toml)
         .override {
-          targets = ["thumbv6m-none-eabi"];
-          extensions = [];
-        };
-      rust-nightly = pkgs.rust-bin.nightly."2024-02-01".default;
+        targets = ["thumbv6m-none-eabi"];
+        extensions = [];
+      };
+      rust-nightly = pkgs.rust-bin.nightly."2025-10-26".default;
 
       cargoNightlyUtil = name:
         pkgs.writeShellScriptBin name ''
