@@ -1,8 +1,5 @@
 #![allow(unused_assignments)]
 
-const BINARY_NAME: &str = "codi";
-const BINARY_EXPECT: &str = "binary is not found, build project first";
-
 macro_rules! gen_cli_test {
     (OK $cmd:ident) => {
         $cmd = $cmd.success()
@@ -25,7 +22,7 @@ macro_rules! gen_cli_test {
     ($name:ident $res:ident $args:expr; $($stream:ident $pred:ident $exp:expr),*) => {
         #[test]
         fn $name() {
-            let mut cmd = assert_cmd::Command::cargo_bin(BINARY_NAME).expect(BINARY_EXPECT);
+            let mut cmd = assert_cmd::cargo_bin_cmd!("codi");
             let mut cmd = cmd.args($args).assert();
             $(gen_cli_test!($stream cmd $pred $exp);)*
             gen_cli_test!($res cmd);
