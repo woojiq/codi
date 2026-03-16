@@ -18,7 +18,7 @@ lexopt = "0.3.2"
 tabled = { version = "0.20.0", default-features = false, features = ["std", "ansi"] }
 
 [dev-dependencies]
-assert_cmd = "2.1.2"
+assert_cmd = "2.2.0"
 predicates = "3.1.4"
 
 [[bin]]
